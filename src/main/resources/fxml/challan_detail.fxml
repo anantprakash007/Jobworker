@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.jobwork.controller.ChallanDetailController"
+      spacing="15"
+      stylesheets="@/css/style.css"
+      style="-fx-padding:20; -fx-background-color:white;">
+
+    <!-- 🔷 HEADER -->
+    <VBox spacing="5">
+
+        <Label text="PYARE LAL"
+               style="-fx-font-size:18px; -fx-font-weight:bold;"/>
+
+        <Label fx:id="lblChallan"
+               style="-fx-font-size:16px; -fx-font-weight:bold;"/>
+
+        <HBox spacing="20">
+            <Label fx:id="lblWorker"/>
+            <Label fx:id="lblDate"/>
+        </HBox>
+
+    </VBox>
+
+    <!-- 🔷 TABLE -->
+    <TableView fx:id="tblDetail" VBox.vgrow="ALWAYS">
+
+        <columns>
+            <TableColumn fx:id="colProduct" text="Product" prefWidth="200"/>
+            <TableColumn fx:id="colQty" text="Qty" prefWidth="100"/>
+            <TableColumn fx:id="colRate" text="Rate" prefWidth="120"/>
+            <TableColumn fx:id="colAmount" text="Amount" prefWidth="150"/>
+        </columns>
+
+    </TableView>
+
+    <!-- 🔷 TOTAL -->
+    <HBox alignment="CENTER_RIGHT" spacing="10"
+          style="-fx-padding:10; -fx-border-color:#e5e7eb; -fx-border-width:1 0 0 0;">
+
+        <Label text="TOTAL:"
+               style="-fx-font-size:14px; -fx-font-weight:bold;"/>
+
+        <Label fx:id="lblTotal"
+               style="-fx-font-size:16px; -fx-font-weight:bold;"/>
+
+    </HBox>
+
+</VBox>

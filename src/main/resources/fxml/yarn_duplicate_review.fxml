@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.openjfx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.jobwork.controller.YarnDuplicateReviewController"
+      spacing="14" prefWidth="980" prefHeight="460"
+      style="-fx-background-color:#f8fafc; -fx-padding:22;">
+
+    <!-- Banner -->
+    <VBox spacing="6"
+          style="-fx-background-color:#fef2f2;-fx-border-color:#fca5a5;
+                 -fx-border-width:1;-fx-border-radius:8;-fx-background-radius:8;
+                 -fx-padding:14 18;">
+        <Label fx:id="lblHeading"
+               style="-fx-font-size:15px;-fx-font-weight:bold;-fx-text-fill:#b91c1c;"/>
+        <Label fx:id="lblSubHeading" wrapText="true"
+               style="-fx-font-size:11.5px;-fx-text-fill:#7f1d1d;-fx-line-spacing:2;"/>
+    </VBox>
+
+    <!-- Legend -->
+    <HBox spacing="20" alignment="CENTER_LEFT">
+        <Label text="Legend:" style="-fx-font-weight:bold;-fx-font-size:11px;-fx-text-fill:#475569;"/>
+        <Label text="⬛ Existing DB values"    style="-fx-font-size:11px;-fx-text-fill:#64748b;"/>
+        <Label text="🟩 New (incoming) values" style="-fx-font-size:11px;-fx-text-fill:#15803d;"/>
+        <Label text="☑ Checked = OVERWRITE"   style="-fx-font-size:11px;-fx-text-fill:#1d4ed8;"/>
+        <Label text="☐ Unchecked = SKIP"       style="-fx-font-size:11px;-fx-text-fill:#64748b;"/>
+    </HBox>
+
+    <!-- Table -->
+    <TableView fx:id="tblDup" VBox.vgrow="ALWAYS" editable="true"
+               style="-fx-background-color:white;-fx-border-color:#e2e8f0;
+                      -fx-border-radius:8;-fx-background-radius:8;">
+        <columns>
+            <TableColumn fx:id="colSelect"   text="Re-Entry"  prefWidth="68"
+                         style="-fx-alignment:CENTER;"/>
+            <TableColumn fx:id="colYarnType" text="Yarn Type" prefWidth="90"/>
+            <TableColumn fx:id="colBagPiece" text="Bag/Piece" prefWidth="72"
+                         style="-fx-alignment:CENTER;"/>
+
+            <!-- Existing group -->
+            <TableColumn text="─── Existing in DB ───"
+                         style="-fx-alignment:CENTER;-fx-background-color:#f1f5f9;
+                                -fx-text-fill:#64748b;-fx-font-style:italic;">
+                <columns>
+                    <TableColumn fx:id="colExistWtBags" text="Wt/Bags"   prefWidth="70"
+                                 style="-fx-background-color:#f8fafc;-fx-alignment:CENTER;"/>
+                    <TableColumn fx:id="colExistColour" text="Colour"    prefWidth="70"
+                                 style="-fx-background-color:#f8fafc;"/>
+                    <TableColumn fx:id="colExistBags"   text="Bags"      prefWidth="55"
+                                 style="-fx-background-color:#f8fafc;-fx-alignment:CENTER-RIGHT;"/>
+                    <TableColumn fx:id="colExistCones"  text="Cones"     prefWidth="55"
+                                 style="-fx-background-color:#f8fafc;-fx-alignment:CENTER-RIGHT;"/>
+                    <TableColumn fx:id="colExistWeight" text="Wt (kg)"   prefWidth="75"
+                                 style="-fx-background-color:#f8fafc;-fx-alignment:CENTER-RIGHT;"/>
+                </columns>
+            </TableColumn>
+
+            <!-- New group -->
+            <TableColumn text="─── New Values ───"
+                         style="-fx-alignment:CENTER;-fx-background-color:#dcfce7;
+                                -fx-text-fill:#15803d;-fx-font-style:italic;">
+                <columns>
+                    <TableColumn fx:id="colNewWtBags" text="Wt/Bags" prefWidth="70"
+                                 style="-fx-background-color:#f0fdf4;-fx-text-fill:#166534;
+                                        -fx-font-weight:bold;-fx-alignment:CENTER;"/>
+                    <TableColumn fx:id="colNewColour" text="Colour"  prefWidth="70"
+                                 style="-fx-background-color:#f0fdf4;-fx-text-fill:#166534;-fx-font-weight:bold;"/>
+                    <TableColumn fx:id="colNewBags"   text="Bags"    prefWidth="55"
+                                 style="-fx-background-color:#f0fdf4;-fx-text-fill:#166534;
+                                        -fx-font-weight:bold;-fx-alignment:CENTER-RIGHT;"/>
+                    <TableColumn fx:id="colNewCones"  text="Cones"   prefWidth="55"
+                                 style="-fx-background-color:#f0fdf4;-fx-text-fill:#166534;
+                                        -fx-font-weight:bold;-fx-alignment:CENTER-RIGHT;"/>
+                    <TableColumn fx:id="colNewWeight" text="Wt (kg)" prefWidth="75"
+                                 style="-fx-background-color:#f0fdf4;-fx-text-fill:#166534;
+                                        -fx-font-weight:bold;-fx-alignment:CENTER-RIGHT;"/>
+                </columns>
+            </TableColumn>
+        </columns>
+        <placeholder>
+            <Label text="No duplicate row to display."
+                   style="-fx-text-fill:#94a3b8;-fx-font-size:13px;"/>
+        </placeholder>
+    </TableView>
+
+    <!-- Action bar -->
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnSkip" text="✖  Skip — Keep Existing"
+                onAction="#onSkip"
+                style="-fx-background-color:#fef2f2;-fx-border-color:#fca5a5;
+                       -fx-border-radius:6;-fx-background-radius:6;
+                       -fx-text-fill:#b91c1c;-fx-font-weight:bold;
+                       -fx-padding:8 20;-fx-font-size:12px;-fx-cursor:hand;"/>
+        <Button fx:id="btnConfirm" text="✔  Confirm Re-Entry"
+                onAction="#onConfirm" defaultButton="true"
+                style="-fx-background-color:linear-gradient(to right,#1e3a8a,#1d4ed8);
+                       -fx-text-fill:white;-fx-font-weight:bold;
+                       -fx-background-radius:6;-fx-font-size:13px;
+                       -fx-padding:8 24;-fx-cursor:hand;"/>
+    </HBox>
+</VBox>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.jobwork.controller.BheemDuplicateReviewController"
+      spacing="12"
+      prefWidth="920"
+      prefHeight="580"
+
+      style="-fx-padding:20; -fx-background-color:#f8fafc;">
+
+    <!-- 🔴 HEADER -->
+    <Label fx:id="lblHeader"
+           style="-fx-background-color:#fee2e2;
+                  -fx-text-fill:#991b1b;
+                  -fx-padding:10;
+                  -fx-background-radius:8;
+                  -fx-font-weight:bold;"/>
+
+    <!-- LEGEND -->
+    <HBox spacing="20" alignment="CENTER_LEFT">
+        <Label text="Legend:"
+               style="-fx-font-weight:bold; -fx-font-size:11px; -fx-text-fill:#475569;"/>
+        <!-- Existing -->
+        <HBox spacing="6" alignment="CENTER_LEFT">
+        <Label text="⬛"
+               style="-fx-text-fill:#94a3b8; -fx-font-size:10px;"/>
+        <Label text="Existing DB values"
+               style="-fx-font-size:11px; -fx-text-fill:#64748b;"/>
+    </HBox>
+        <!-- New -->
+    <HBox spacing="6" alignment="CENTER_LEFT">
+        <Label text="🟩"
+               style="-fx-text-fill:#22c55e; -fx-font-size:10px;"/>
+        <Label text="New (incoming) values"
+               style="-fx-font-size:11px; -fx-text-fill:#15803d;"/>
+    </HBox>
+    <!-- Checked = overwrite -->
+    <HBox spacing="6" alignment="CENTER_LEFT">
+        <Label text="☑"
+               style="-fx-text-fill:#3b82f6; -fx-font-size:12px;"/>
+        <Label text="Checked = OVERWRITE existing"
+               style="-fx-font-size:11px; -fx-text-fill:#1d4ed8;"/>
+    </HBox>
+        <!-- Unchecked = skip -->
+        <HBox spacing="6" alignment="CENTER_LEFT">
+            <Label text="☐"
+                   style="-fx-text-fill:#94a3b8; -fx-font-size:12px;"/>
+            <Label text="Unchecked = SKIP"
+                   style="-fx-font-size:11px; -fx-text-fill:#64748b;"/>
+        </HBox>
+    </HBox>
+
+    <!-- TABLE -->
+    <TableView fx:id="table" VBox.vgrow="ALWAYS">
+
+        <columns>
+
+            <TableColumn fx:id="colSelect" text="Re-Entry" prefWidth="80"/>
+
+            <TableColumn fx:id="colBheem" text="Bheem" prefWidth="120"/>
+            <TableColumn fx:id="colTaar" text="Taar" prefWidth="80"/>
+
+            <!-- EXISTING -->
+            <TableColumn text="─── Existing in DB ───"
+                         style="-fx-alignment:CENTER;
+                                -fx-background-color:#f1f5f9;
+                                -fx-text-fill:#64748b;
+                                -fx-font-style:italic;">
+                <columns>
+                    <TableColumn fx:id="colOldWeight" text="Weight (kg)" prefWidth="120"/>
+                </columns>
+            </TableColumn>
+
+            <!-- NEW -->
+            <TableColumn text="─── New Values ───"
+                         style="-fx-alignment:CENTER;
+                                -fx-background-color:#dcfce7;
+                                -fx-text-fill:#15803d;
+                                -fx-font-style:italic;">
+                <columns>
+                    <TableColumn fx:id="colNewWeight" text="Weight (kg)" prefWidth="120"/>
+                </columns>
+            </TableColumn>
+
+        </columns>
+    </TableView>
+
+    <!-- BUTTONS -->
+    <HBox spacing="12" alignment="CENTER_RIGHT">
+
+        <Button text="Select All" onAction="#onSelectAll"/>
+        <Button text="Deselect All" onAction="#onDeselectAll"/>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <Button text="✖ Skip All Duplicates"
+                onAction="#onSkipAll"
+                style="-fx-background-color:#ef4444; -fx-text-fill:white;"/>
+
+        <Button text="✔ Confirm Re-Entry"
+                onAction="#onConfirm"
+                style="-fx-background-color:#2563eb; -fx-text-fill:white;"/>
+    </HBox>
+
+</VBox>

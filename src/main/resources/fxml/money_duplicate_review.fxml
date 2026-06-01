@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!--
+  money_import_review.fxml
+  ─────────────────────────────────────────────────────────────────
+  Popup shown when MoneyImportPreviewController detects duplicate
+  rows during Excel import of MoneyReceipt entries.
+
+  Controller: MoneyDuplicateReviewController
+  Place in: src/main/resources/fxml/money_import_review.fxml
+
+  Columns:
+  ┌──────┬──────────┬─────────┬────────┬──────────┬────────────────┐
+  │Re-Ent│  Worker  │ Challan │  Date  │  Tx Type │ Existing │ New  │
+  ├──────┼──────────┼─────────┼────────┼──────────┼──────────┼─────┤
+  │  ☐   │ Gend Lal │   64   │20/4/26 │  ADVANCE │ ₹5000   │₹7000│
+  └──────┴──────────┴─────────┴────────┴──────────┴──────────┴─────┘
+
+  Actions:
+    ☑ Select All     → tick all rows
+    ☐ Deselect All   → untick all rows
+    ✖ Skip All       → close without overwriting anything
+    ✔ Confirm Re-Entry → overwrite ticked rows, save non-duplicates
+-->
+<VBox xmlns="http://javafx.openjfx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.jobwork.controller.MoneyDuplicateReviewController"
+      spacing="14"
+      prefWidth="900"
+      prefHeight="500"
+      style="-fx-background-color:#f8fafc; -fx-padding:24;">
+
+    <!-- ── Banner ──────────────────────────────────────────────── -->
+    <VBox spacing="6"
+          style="-fx-background-color:#fef2f2;
+                 -fx-border-color:#fca5a5;
+                 -fx-border-width:1;
+                 -fx-border-radius:8;
+                 -fx-background-radius:8;
+                 -fx-padding:14 18;">
+
+        <Label fx:id="lblHeading"
+               text="⚠  Duplicate Money Receipt Entries Found!"
+               style="-fx-font-size:15px;
+                      -fx-font-weight:bold;
+                      -fx-text-fill:#b91c1c;"/>
+
+        <Label fx:id="lblSubHeading"
+               text=""
+               wrapText="true"
+               style="-fx-font-size:11.5px;
+                      -fx-text-fill:#7f1d1d;
+                      -fx-line-spacing:2;"/>
+    </VBox>
+
+    <!-- ── Legend ─────────────────────────────────────────────── -->
+    <HBox spacing="20" alignment="CENTER_LEFT">
+        <Label text="Legend:"
+               style="-fx-font-weight:bold;-fx-font-size:11px;-fx-text-fill:#475569;"/>
+        <Label text="⬛ Existing DB values"
+               style="-fx-font-size:11px;-fx-text-fill:#64748b;"/>
+        <Label text="🟩 New (incoming) values"
+               style="-fx-font-size:11px;-fx-text-fill:#15803d;"/>
+        <Label text="☑ Checked = OVERWRITE"
+               style="-fx-font-size:11px;-fx-text-fill:#1d4ed8;"/>
+        <Label text="☐ Unchecked = SKIP"
+               style="-fx-font-size:11px;-fx-text-fill:#64748b;"/>
+    </HBox>
+
+    <!-- ── Table ──────────────────────────────────────────────── -->
+    <TableView fx:id="tblDup"
+               VBox.vgrow="ALWAYS"
+               editable="true"
+               style="-fx-background-color:white;
+                      -fx-border-color:#e2e8f0;
+                      -fx-border-radius:8;
+                      -fx-background-radius:8;">
+        <columns>
+
+            <!-- Checkbox -->
+            <TableColumn fx:id="colSelect"
+                         text="Re-Entry"
+                         prefWidth="76"
+                         style="-fx-alignment:CENTER;"/>
+
+            <!-- Identity columns (same for existing and new) -->
+            <TableColumn fx:id="colWorker"
+                         text="Worker"
+                         prefWidth="110"/>
+
+            <TableColumn fx:id="colChallan"
+                         text="Challan"
+                         prefWidth="80"/>
+
+            <TableColumn fx:id="colDate"
+                         text="Date"
+                         prefWidth="95"/>
+
+            <TableColumn fx:id="colTxType"
+                         text="Tx Type"
+                         prefWidth="105"
+                         style="-fx-alignment:CENTER;-fx-font-weight:bold;"/>
+
+            <!-- ── Existing group ── -->
+            <TableColumn text="─── Existing in DB ───"
+                         style="-fx-alignment:CENTER;
+                                -fx-background-color:#f1f5f9;
+                                -fx-text-fill:#64748b;
+                                -fx-font-style:italic;">
+                <columns>
+                    <TableColumn fx:id="colExistAmount"
+                                 text="Amount (₹)"
+                                 prefWidth="105"
+                                 style="-fx-background-color:#f8fafc;
+                                        -fx-alignment:CENTER-RIGHT;"/>
+                    <TableColumn fx:id="colExistRemark"
+                                 text="Remark"
+                                 prefWidth="130"
+                                 style="-fx-background-color:#f8fafc;"/>
+                </columns>
+            </TableColumn>
+
+            <!-- ── New values group ── -->
+            <TableColumn text="─── New Values ───"
+                         style="-fx-alignment:CENTER;
+                                -fx-background-color:#dcfce7;
+                                -fx-text-fill:#15803d;
+                                -fx-font-style:italic;">
+                <columns>
+                    <TableColumn fx:id="colNewAmount"
+                                 text="Amount (₹)"
+                                 prefWidth="105"
+                                 style="-fx-background-color:#f0fdf4;
+                                        -fx-text-fill:#166534;
+                                        -fx-font-weight:bold;
+                                        -fx-alignment:CENTER-RIGHT;"/>
+                    <TableColumn fx:id="colNewRemark"
+                                 text="Remark"
+                                 prefWidth="130"
+                                 style="-fx-background-color:#f0fdf4;
+                                        -fx-text-fill:#166534;
+                                        -fx-font-weight:bold;"/>
+                </columns>
+            </TableColumn>
+
+        </columns>
+
+        <placeholder>
+            <Label text="No duplicate rows to display."
+                   style="-fx-text-fill:#94a3b8;-fx-font-size:13px;"/>
+        </placeholder>
+    </TableView>
+
+    <!-- ── Action bar ──────────────────────────────────────────── -->
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+
+        <!-- Left: select helpers -->
+        <Button fx:id="btnSelectAll"
+                text="☑  Select All"
+                onAction="#onSelectAll"
+                style="-fx-background-color:white;
+                       -fx-border-color:#94a3b8;
+                       -fx-border-radius:6;
+                       -fx-background-radius:6;
+                       -fx-padding:7 16;
+                       -fx-font-size:12px;
+                       -fx-cursor:hand;"/>
+
+        <Button fx:id="btnDeselectAll"
+                text="☐  Deselect All"
+                onAction="#onDeselectAll"
+                style="-fx-background-color:white;
+                       -fx-border-color:#94a3b8;
+                       -fx-border-radius:6;
+                       -fx-background-radius:6;
+                       -fx-padding:7 16;
+                       -fx-font-size:12px;
+                       -fx-cursor:hand;"/>
+
+        <!-- Spacer -->
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <!-- Skip All -->
+        <Button fx:id="btnSkip"
+                text="✖  Skip — Keep Existing"
+                onAction="#onSkip"
+                style="-fx-background-color:#fef2f2;
+                       -fx-border-color:#fca5a5;
+                       -fx-border-radius:6;
+                       -fx-background-radius:6;
+                       -fx-text-fill:#b91c1c;
+                       -fx-font-weight:bold;
+                       -fx-padding:8 20;
+                       -fx-font-size:12px;
+                       -fx-cursor:hand;"/>
+
+        <!-- Confirm -->
+        <Button fx:id="btnConfirm"
+                text="✔  Confirm Re-Entry"
+                onAction="#onConfirm"
+                defaultButton="true"
+                style="-fx-background-color:linear-gradient(to right,#065f46,#059669);
+                       -fx-text-fill:white;
+                       -fx-font-weight:bold;
+                       -fx-background-radius:6;
+                       -fx-font-size:13px;
+                       -fx-padding:8 24;
+                       -fx-cursor:hand;"/>
+    </HBox>
+
+</VBox>

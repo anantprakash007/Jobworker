@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.jobwork.controller.AdvanceLedgerController"
+            styleClass="page-bg">
+
+    <!-- HEADER -->
+    <top>
+        <HBox styleClass="page-header-green" alignment="CENTER_LEFT" spacing="20">
+            <VBox>
+                <Label text="💰 Advance Ledger" styleClass="page-title"/>
+                <Label text="Dashboard / Finance / Ledger" styleClass="breadcrumb"/>
+            </VBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="ACTIVE" styleClass="badge-green"/>
+        </HBox>
+    </top>
+
+    <!-- BODY -->
+    <center>
+        <VBox spacing="15" styleClass="scroll-content">
+
+            <!-- FILTER -->
+            <HBox spacing="10" styleClass="filter-bar">
+
+                <ComboBox fx:id="cbWorker" promptText="Select Worker"/>
+                <Button text="Load" onAction="#onLoad" styleClass="btn-primary"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button text="Excel" onAction="#onExcel" styleClass="btn-excel"/>
+                <Button text="PDF" onAction="#onPdf" styleClass="btn-danger"/>
+            </HBox>
+
+            <!-- CARD -->
+            <VBox styleClass="glass-card">
+
+                <HBox styleClass="card-header-green">
+                    <Label text="Worker Ledger Details" styleClass="card-title-green"/>
+                </HBox>
+
+                <TableView fx:id="tblLedger" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colDate" text="Date"/>
+                        <TableColumn fx:id="colType" text="Type"/>
+                        <TableColumn fx:id="colAmount" text="Amount"/>
+                        <TableColumn fx:id="colBalance" text="Balance"/>
+                    </columns>
+                </TableView>
+
+                <!-- TOTAL -->
+                <HBox alignment="CENTER_RIGHT" styleClass="total-chip-green">
+                    <VBox>
+                        <Label text="Total Movement" styleClass="total-label"/>
+                        <Label fx:id="lblTotal" text="₹ 0.00" styleClass="total-value"/>
+                    </VBox>
+                </HBox>
+
+            </VBox>
+        </VBox>
+    </center>
+
+</BorderPane>

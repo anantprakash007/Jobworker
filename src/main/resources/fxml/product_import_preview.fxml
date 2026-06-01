@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.openjfx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.jobwork.controller.ProductImportPreviewController"
+      spacing="12"
+      prefWidth="1100"
+      prefHeight="650"
+      style="-fx-background-color:#f8fafc; -fx-padding:20;">
+
+    <!-- HEADER -->
+    <HBox spacing="14" alignment="CENTER_LEFT"
+          style="-fx-background-color:linear-gradient(to right,#065f46,#059669);
+             -fx-padding:14 18;-fx-background-radius:8;">
+
+        <Label text="📦 Product Entry — Excel Import Preview"
+               style="-fx-font-size:16px;-fx-font-weight:bold;-fx-text-fill:white;"/>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <!-- ✅ FILE NAME (LIKE MONEY UI) -->
+        <Label fx:id="lblFile"
+               text="No file loaded"
+               style="-fx-font-size:12px;-fx-text-fill:#a7f3d0;"/>
+    </HBox>
+    <!-- ✅ EXPECTED COLUMN ORDER (LIKE MONEY UI) -->
+    <HBox spacing="10"
+          style="-fx-background-color:#ecfdf5;
+             -fx-border-color:#10b981;
+             -fx-border-radius:6;
+             -fx-background-radius:6;
+             -fx-padding:10 12;">
+
+        <Label text="📋 Expected Excel Column Order (Row 1 = Header, Data from Row 2):"
+               style="-fx-font-weight:bold; -fx-text-fill:#065f46;"/>
+
+        <Label text="
+A: Worker ID  B: Challan No  C: Date (dd/MM/yyyy)
+D: Product Type  E: Product Name
+F: Qty  G: Unit  H: Weight  I: Wt/Piece"
+               style="-fx-text-fill:#065f46; -fx-font-size:12px;"/>
+    </HBox>
+
+    <!-- SUMMARY -->
+    <HBox spacing="16" alignment="CENTER_LEFT">
+        <Label fx:id="lblSummary"
+               text="No rows loaded."
+               style="-fx-font-size:12px;-fx-font-weight:bold;-fx-text-fill:#374151;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="☑ Select All" onAction="#onSelectAll"/>
+        <Button text="✔ Select Valid/Dup" onAction="#onSelectValid"/>
+        <Button text="☐ Deselect All" onAction="#onDeselectAll"/>
+    </HBox>
+
+    <!-- TABLE -->
+    <TableView fx:id="tblPreview" VBox.vgrow="ALWAYS">
+
+        <columns>
+
+            <TableColumn fx:id="colSelect" text="Import" prefWidth="60"/>
+            <TableColumn fx:id="colRow" text="Row" prefWidth="60"/>
+
+            <TableColumn fx:id="colWorkerId" text="Worker (ID)" prefWidth="100"/>
+            <TableColumn fx:id="colWorkerName" text="Worker Name" prefWidth="150"/>
+            <TableColumn fx:id="colChallan" text="Challan" prefWidth="90"/>
+            <TableColumn fx:id="colDate" text="Date" prefWidth="100"/>
+
+            <TableColumn fx:id="colProductType" text="Product Type" prefWidth="120"/>
+            <TableColumn fx:id="colProductName" text="Product Name" prefWidth="140"/>
+
+            <TableColumn fx:id="colQty" text="Qty" prefWidth="80"/>
+            <TableColumn fx:id="colUnit" text="Unit" prefWidth="80"/>
+
+            <TableColumn fx:id="colWeight" text="Weight" prefWidth="100"/>
+            <TableColumn fx:id="colWtPerPiece" text="Wt/Piece" prefWidth="100"/>
+
+            <TableColumn fx:id="colStatus" text="Status" prefWidth="200"/>
+            <TableColumn fx:id="colError" text="Error Detail" prefWidth="250"/>
+
+        </columns>
+    </TableView>
+
+    <!-- FOOTER -->
+    <HBox spacing="10">
+
+        <Label text="Legend:"/>
+        <Label text="White = valid"/>
+        <Label text="Amber = duplicate"/>
+        <Label text="Red = error"/>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <Button text="📥 Import Selected Rows"
+                onAction="#onImport"
+                style="-fx-background-color:#059669; -fx-text-fill:white;"/>
+
+        <ProgressBar fx:id="progressBar" prefWidth="250"/>
+        <Label fx:id="lblStatus"
+               text="Ready"
+               style="-fx-font-size:12px; -fx-text-fill:#374151;"/>
+        <Button text="Close" onAction="#onClose"/>
+    </HBox>
+
+</VBox>

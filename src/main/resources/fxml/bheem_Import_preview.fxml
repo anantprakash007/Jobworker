@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.jobwork.controller.BheemImportPreviewController"
+      spacing="12"
+      prefWidth="1100"
+      prefHeight="650"
+      style="-fx-background-color:#f8fafc; -fx-padding:20;">
+
+    <!-- HEADER -->
+    <HBox spacing="14" alignment="CENTER_LEFT"
+          style="-fx-background-color:linear-gradient(to right,#6d28d9,#7c3aed);
+                 -fx-padding:14 18;-fx-background-radius:8;">
+        <Label text="📥 Bheem Entry — Excel Import Preview"
+               style="-fx-font-size:16px;-fx-font-weight:bold;-fx-text-fill:white;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="lblFileName"
+               text="No file loaded"
+               style="-fx-font-size:12px;-fx-text-fill:#e9d5ff;"/>
+    </HBox>
+
+    <!-- SUMMARY + ACTIONS -->
+    <HBox spacing="16" alignment="CENTER_LEFT">
+
+        <Label fx:id="lblSummary"
+               text="No rows loaded."
+               style="-fx-font-size:12px;-fx-font-weight:bold;-fx-text-fill:#374151;"/>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <Button text="☑ Select All" onAction="#onSelectAll"/>
+        <Button text="✔ Select Valid" onAction="#onSelectValid"/>
+        <Button text="☐ Deselect All" onAction="#onDeselectAll"/>
+    </HBox>
+
+    <!-- PROGRESS BAR -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Progress:" style="-fx-font-size:12px;"/>
+        <ProgressBar fx:id="progressBar"
+                     prefWidth="400"
+                     progress="0.0"/>
+    </HBox>
+
+    <!-- TABLE -->
+    <TableView fx:id="tblPreview" VBox.vgrow="ALWAYS" editable="true">
+
+        <columns>
+
+            <TableColumn fx:id="colSelect" text="Import" prefWidth="60"/>
+            <TableColumn fx:id="colRow" text="Row" prefWidth="50"/>
+            <TableColumn fx:id="colWorker" text="Worker" prefWidth="130"/>
+            <TableColumn fx:id="colLocation" text="Location" prefWidth="120"/>
+            <TableColumn fx:id="colChallan" text="Challan" prefWidth="90"/>
+            <TableColumn fx:id="colDate" text="Date" prefWidth="100"/>
+            <TableColumn fx:id="colBheemName" text="Bheem" prefWidth="120"/>
+            <TableColumn fx:id="colTaar" text="Taar" prefWidth="80"/>
+            <TableColumn fx:id="colWrapper" text="Wrapper" prefWidth="120"/>
+            <TableColumn fx:id="colYarn" text="Yarn" prefWidth="120"/>
+            <TableColumn fx:id="colColour" text="Colour" prefWidth="100"/>
+            <TableColumn fx:id="colWeight" text="Weight" prefWidth="90"/>
+            <TableColumn fx:id="colStatus" text="Status" prefWidth="180"/>
+
+        </columns>
+
+        <placeholder>
+            <Label text="No rows loaded"
+                   style="-fx-text-fill:#94a3b8;"/>
+        </placeholder>
+
+    </TableView>
+
+    <!-- ACTION BAR -->
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+
+        <Button text="Close" onAction="#onClose"/>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <Button text="Validate"
+                onAction="#onValidate"
+                style="-fx-background-color:#1e3a8a; -fx-text-fill:white;"/>
+
+        <Button text="Import"
+                onAction="#onImport"
+                style="-fx-background-color:#059669; -fx-text-fill:white;"/>
+
+    </HBox>
+
+</VBox>

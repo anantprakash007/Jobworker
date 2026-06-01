@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.jobwork.controller.AccountLedgerController"
+      stylesheets="@/css/style.css"
+      style="-fx-background-color:#f0f4ff;" spacing="0">
+
+
+    <!-- 🔷 HEADER -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="📊 Account Ledger"
+               style="-fx-font-size:22px; -fx-font-weight:bold;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Excel" onAction="#onExcel"
+                style="-fx-background-color:#10b981; -fx-text-fill:white;"/>
+        <Button text="PDF" onAction="#onPdf"
+                style="-fx-background-color:#ef4444; -fx-text-fill:white;"/>
+    </HBox>
+
+    <!-- 🔷 FILTER -->
+    <HBox spacing="10">
+        <ComboBox fx:id="cbWorker" promptText="Select Worker"/>
+        <DatePicker fx:id="dpFrom"/>
+        <DatePicker fx:id="dpTo"/>
+        <Button text="Search" onAction="#onSearch"
+                style="-fx-background-color:#2563eb; -fx-text-fill:white;"/>
+        <!-- 🔥 ADD THESE 2 BUTTONS HERE -->
+        <HBox spacing="5" style="-fx-background-color:#e5e7eb; -fx-padding:5; -fx-background-radius:10;">
+
+            <ToggleButton fx:id="btnAll" text="All"
+                          styleClass="filter-chip"/>
+
+            <ToggleButton fx:id="btnCredit" text="💰 Credit"
+                          styleClass="filter-chip-green"/>
+
+            <ToggleButton fx:id="btnDebit" text="💸 Debit"
+                          styleClass="filter-chip-red"/>
+
+        </HBox>
+    </HBox>
+    <HBox spacing="10" style="-fx-padding:5 0;">
+
+        <Button text="Today" onAction="#onToday"/>
+        <Button text="This Week" onAction="#onWeek"/>
+        <Button text="This Month" onAction="#onMonth"/>
+        <Button text="Reset" onAction="#onReset"/>
+        <Button text="➕ Adjustment"
+                onAction="#onAddAdjustment"
+                style="-fx-background-color:#f59e0b; -fx-text-fill:white;"/>
+
+    </HBox>
+
+    <!-- 🔷 SUMMARY CARDS -->
+    <HBox spacing="20">
+
+        <VBox spacing="5" style="-fx-background-color:#dbeafe; -fx-padding:10; -fx-background-radius:8;">
+            <Label text="Total Work"/>
+            <Label fx:id="lblDebit" style="-fx-font-size:16px; -fx-font-weight:bold;"/>
+        </VBox>
+
+        <VBox spacing="5" style="-fx-background-color:#dcfce7; -fx-padding:10; -fx-background-radius:8;">
+            <Label text="Total Paid"/>
+            <Label fx:id="lblCredit" style="-fx-font-size:16px; -fx-font-weight:bold;"/>
+        </VBox>
+
+        <VBox spacing="5" style="-fx-background-color:#fee2e2; -fx-padding:10; -fx-background-radius:8;">
+            <Label text="Outstanding"/>
+            <Label fx:id="lblBalance" style="-fx-font-size:16px; -fx-font-weight:bold;"/>
+        </VBox>
+
+    </HBox>
+
+    <!-- 🔷 TABLE -->
+    <TableView fx:id="tblLedger" VBox.vgrow="ALWAYS">
+
+        <columns>
+            <TableColumn fx:id="colDate" text="Date" prefWidth="120"/>
+            <TableColumn fx:id="colParticular" text="Particular" prefWidth="200"/>
+            <TableColumn fx:id="colDebit" text="Debit (₹)" prefWidth="150"/>
+            <TableColumn fx:id="colCredit" text="Credit (₹)" prefWidth="150"/>
+            <TableColumn fx:id="colBalance" text="Balance (₹)" prefWidth="150"/>
+        </columns>
+
+    </TableView>
+
+</VBox>

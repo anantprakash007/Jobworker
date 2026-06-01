@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.jobwork.controller.YarnImportPreviewController"
+      spacing="12" prefWidth="1180" prefHeight="640"
+      style="-fx-background-color:#f8fafc; -fx-padding:20;">
+    <ProgressBar fx:id="progressBar" prefWidth="400"/>
+    <!-- Header -->
+    <HBox spacing="14" alignment="CENTER_LEFT"
+          style="-fx-background-color:linear-gradient(to right,#0f766e,#0d9488);
+                 -fx-padding:14 18;-fx-background-radius:8;">
+        <Label text="📥  Yarn Entry — Excel Import Preview"
+               style="-fx-font-size:16px;-fx-font-weight:bold;-fx-text-fill:white;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="lblFileName" text="No file loaded"
+               style="-fx-font-size:12px;-fx-text-fill:#ccfbf1;"/>
+    </HBox>
+
+    <!-- Format hint -->
+    <VBox style="-fx-background-color:#f0fdfa;-fx-border-color:#5eead4;
+                 -fx-border-width:1;-fx-border-radius:6;-fx-background-radius:6;
+                 -fx-padding:10 14;" spacing="4">
+        <Label text="📋  Expected Excel Column Order (Row 1 = Header, Data from Row 2):"
+               style="-fx-font-weight:bold;-fx-font-size:11px;-fx-text-fill:#134e4a;"/>
+        <Label text="A: Worker Name   B: Location   C: Challan No   D: Date (dd/MM/yyyy)   E: Bag/Piece (BAG or PIECE)   F: Wt of Bags (50 kg/60 kg/70 kg/75 kg/90 kg — blank for PIECE)"
+               style="-fx-font-size:11px;-fx-text-fill:#0f766e;-fx-font-family:'Courier New';"/>
+        <Label text="G: Yarn Count   H: Colour   I: No. of Bags (0 for PIECE)   J: No. of Cones (0 for BAG)   K: Net Weight (kg)"
+               style="-fx-font-size:11px;-fx-text-fill:#0f766e;-fx-font-family:'Courier New';"/>
+    </VBox>
+
+    <!-- Summary + select buttons -->
+    <HBox spacing="16" alignment="CENTER_LEFT">
+        <Label fx:id="lblSummary" text="No rows loaded."
+               style="-fx-font-size:12px;-fx-font-weight:bold;-fx-text-fill:#374151;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnSelectAll"   text="☑ Select All"         onAction="#onSelectAll"
+                style="-fx-background-color:white;-fx-border-color:#94a3b8;
+                       -fx-border-radius:5;-fx-background-radius:5;
+                       -fx-padding:5 14;-fx-font-size:11px;-fx-cursor:hand;"/>
+        <Button fx:id="btnSelectValid" text="✔ Select Valid/Dup"   onAction="#onSelectValid"
+                style="-fx-background-color:white;-fx-border-color:#94a3b8;
+                       -fx-border-radius:5;-fx-background-radius:5;
+                       -fx-padding:5 14;-fx-font-size:11px;-fx-cursor:hand;"/>
+        <Button fx:id="btnDeselectAll" text="☐ Deselect All"       onAction="#onDeselectAll"
+                style="-fx-background-color:white;-fx-border-color:#94a3b8;
+                       -fx-border-radius:5;-fx-background-radius:5;
+                       -fx-padding:5 14;-fx-font-size:11px;-fx-cursor:hand;"/>
+    </HBox>
+
+    <!-- Preview table -->
+    <TableView fx:id="tblPreview" VBox.vgrow="ALWAYS" editable="true"
+               style="-fx-background-color:white;-fx-border-color:#e2e8f0;
+                      -fx-border-radius:8;-fx-background-radius:8;">
+        <columns>
+            <TableColumn fx:id="colSelect"   text="Import"    prefWidth="62"
+                         style="-fx-alignment:CENTER;"/>
+            <TableColumn fx:id="colRow"      text="Row"       prefWidth="44"
+                         style="-fx-alignment:CENTER;"/>
+            <TableColumn fx:id="colWorker"   text="Worker"    prefWidth="95"/>
+            <TableColumn fx:id="colLocation" text="Location"  prefWidth="85"/>
+            <TableColumn fx:id="colChallan"  text="Challan"   prefWidth="72"/>
+            <TableColumn fx:id="colDate"     text="Date"      prefWidth="90"/>
+            <TableColumn fx:id="colBagPiece" text="Bag/Piece" prefWidth="70"
+                         style="-fx-alignment:CENTER;"/>
+            <TableColumn fx:id="colWtOfBags" text="Wt/Bags"  prefWidth="68"
+                         style="-fx-alignment:CENTER;"/>
+            <TableColumn fx:id="colYarnCount" text="Yarn"    prefWidth="80"/>
+            <TableColumn fx:id="colColour"   text="Colour"   prefWidth="70"/>
+            <TableColumn fx:id="colBags"     text="Bags"     prefWidth="55"
+                         style="-fx-alignment:CENTER-RIGHT;"/>
+            <TableColumn fx:id="colCones"    text="Cones"    prefWidth="55"
+                         style="-fx-alignment:CENTER-RIGHT;"/>
+            <TableColumn fx:id="colNetWeight" text="Wt (kg)" prefWidth="72"
+                         style="-fx-alignment:CENTER-RIGHT;"/>
+            <TableColumn fx:id="colStatus"   text="Status"   prefWidth="240"/>
+        </columns>
+        <placeholder>
+            <Label text="No rows loaded. Select an Excel file to preview."
+                   style="-fx-text-fill:#94a3b8;-fx-font-size:13px;"/>
+        </placeholder>
+    </TableView>
+
+    <!-- Legend -->
+    <HBox spacing="20" alignment="CENTER_LEFT">
+        <Label text="Legend:" style="-fx-font-weight:bold;-fx-font-size:11px;-fx-text-fill:#475569;"/>
+        <Label text="⬜ White = valid new row"
+               style="-fx-font-size:11px;-fx-text-fill:#374151;"/>
+        <Label text="🟨 Amber = duplicate (OVERWRITES existing if selected)"
+               style="-fx-font-size:11px;-fx-text-fill:#d97706;"/>
+        <Label text="🟥 Red = validation error (always skipped)"
+               style="-fx-font-size:11px;-fx-text-fill:#b91c1c;"/>
+    </HBox>
+
+    <!-- Action bar -->
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button fx:id="btnClose" text="✕  Close" onAction="#onClose"
+                style="-fx-background-color:white;-fx-border-color:#94a3b8;
+                       -fx-border-radius:6;-fx-background-radius:6;
+                       -fx-padding:8 20;-fx-font-size:12px;-fx-cursor:hand;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnImport" text="📥  Import Selected Rows"
+                onAction="#onImport" defaultButton="true"
+                style="-fx-background-color:linear-gradient(to right,#0f766e,#0d9488);
+                       -fx-text-fill:white;-fx-font-weight:bold;
+                       -fx-background-radius:6;-fx-font-size:13px;
+                       -fx-padding:8 28;-fx-cursor:hand;"/>
+    </HBox>
+</VBox>

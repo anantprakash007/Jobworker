@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<!--
+  duplicate_review.fxml
+  ─────────────────────────────────────────────────────────────────
+  Popup window shown when duplicate entries are detected.
+
+  Wiring:
+    fx:controller="com.jobwork.controller.DuplicateReviewController"
+
+  After loading:
+    DuplicateReviewController.init(result, challanNo, callback)
+  must be called before stage.show().
+-->
+<VBox xmlns="http://javafx.openjfx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.jobwork.controller.DuplicateReviewController"
+      spacing="14"
+      prefWidth="920"
+      prefHeight="580"
+      style="-fx-background-color:#f8fafc; -fx-padding:24;">
+
+    <!-- ── Banner ─────────────────────────────────────────────── -->
+    <VBox spacing="6"
+          style="-fx-background-color:#fef2f2;
+                 -fx-border-color:#fca5a5;
+                 -fx-border-width:1;
+                 -fx-border-radius:8;
+                 -fx-background-radius:8;
+                 -fx-padding:14 18;">
+
+        <Label fx:id="lblHeading"
+               text="⚠  Duplicate Entries Found!"
+               style="-fx-font-size:16px;
+                      -fx-font-weight:bold;
+                      -fx-text-fill:#b91c1c;"/>
+
+        <Label fx:id="lblSubHeading"
+               text=""
+               wrapText="true"
+               style="-fx-font-size:12px;
+                      -fx-text-fill:#7f1d1d;
+                      -fx-line-spacing:2;"/>
+    </VBox>
+
+    <!-- ── Legend ─────────────────────────────────────────────── -->
+    <HBox spacing="20" alignment="CENTER_LEFT">
+        <Label text="Legend:"
+               style="-fx-font-weight:bold; -fx-font-size:11px; -fx-text-fill:#475569;"/>
+
+        <!-- Existing -->
+        <HBox spacing="6" alignment="CENTER_LEFT">
+            <Label text="⬛"
+                   style="-fx-text-fill:#94a3b8; -fx-font-size:10px;"/>
+            <Label text="Existing DB values"
+                   style="-fx-font-size:11px; -fx-text-fill:#64748b;"/>
+        </HBox>
+
+        <!-- New -->
+        <HBox spacing="6" alignment="CENTER_LEFT">
+            <Label text="🟩"
+                   style="-fx-text-fill:#22c55e; -fx-font-size:10px;"/>
+            <Label text="New (incoming) values"
+                   style="-fx-font-size:11px; -fx-text-fill:#15803d;"/>
+        </HBox>
+
+        <!-- Checked = overwrite -->
+        <HBox spacing="6" alignment="CENTER_LEFT">
+            <Label text="☑"
+                   style="-fx-text-fill:#3b82f6; -fx-font-size:12px;"/>
+            <Label text="Checked = OVERWRITE existing"
+                   style="-fx-font-size:11px; -fx-text-fill:#1d4ed8;"/>
+        </HBox>
+
+        <!-- Unchecked = skip -->
+        <HBox spacing="6" alignment="CENTER_LEFT">
+            <Label text="☐"
+                   style="-fx-text-fill:#94a3b8; -fx-font-size:12px;"/>
+            <Label text="Unchecked = SKIP"
+                   style="-fx-font-size:11px; -fx-text-fill:#64748b;"/>
+        </HBox>
+    </HBox>
+
+    <!-- ── Table ──────────────────────────────────────────────── -->
+    <TableView fx:id="tblDuplicates"
+               VBox.vgrow="ALWAYS"
+               editable="true"
+               style="-fx-background-color:white;
+                      -fx-border-color:#e2e8f0;
+                      -fx-border-radius:8;
+                      -fx-background-radius:8;">
+
+        <columns>
+
+            <!-- Checkbox -->
+            <TableColumn fx:id="colSelect"
+                         text="Re-Entry"
+                         prefWidth="72"
+                         style="-fx-alignment:CENTER;"/>
+
+            <!-- Product Type -->
+            <TableColumn fx:id="colProductType"
+                         text="Product Type"
+                         prefWidth="120"/>
+
+            <!-- Product Name -->
+            <TableColumn fx:id="colProductName"
+                         text="Product Name"
+                         prefWidth="150"/>
+
+            <!-- ── Existing group ── -->
+            <TableColumn text="─── Existing in DB ───"
+                         style="-fx-alignment:CENTER;
+                                -fx-background-color:#f1f5f9;
+                                -fx-text-fill:#64748b;
+                                -fx-font-style:italic;">
+                <columns>
+                    <TableColumn fx:id="colExistQty"
+                                 text="Qty"
+                                 prefWidth="80"
+                                 style="-fx-alignment:CENTER-RIGHT;
+                                        -fx-background-color:#f8fafc;"/>
+
+                    <TableColumn fx:id="colExistWt"
+                                 text="Weight (kg)"
+                                 prefWidth="100"
+                                 style="-fx-alignment:CENTER-RIGHT;
+                                        -fx-background-color:#f8fafc;"/>
+
+                    <TableColumn fx:id="colExistWtPc"
+                                 text="Wt/Piece"
+                                 prefWidth="90"
+                                 style="-fx-alignment:CENTER-RIGHT;
+                                        -fx-background-color:#f8fafc;"/>
+                </columns>
+            </TableColumn>
+
+            <!-- ── New values group ── -->
+            <TableColumn text="─── New Values ───"
+                         style="-fx-alignment:CENTER;
+                                -fx-background-color:#dcfce7;
+                                -fx-text-fill:#15803d;
+                                -fx-font-style:italic;">
+                <columns>
+                    <TableColumn fx:id="colNewQty"
+                                 text="Qty"
+                                 prefWidth="80"
+                                 style="-fx-alignment:CENTER-RIGHT;
+                                        -fx-background-color:#f0fdf4;
+                                        -fx-text-fill:#166534;
+                                        -fx-font-weight:bold;"/>
+
+                    <TableColumn fx:id="colNewWt"
+                                 text="Weight (kg)"
+                                 prefWidth="100"
+                                 style="-fx-alignment:CENTER-RIGHT;
+                                        -fx-background-color:#f0fdf4;
+                                        -fx-text-fill:#166534;
+                                        -fx-font-weight:bold;"/>
+
+                    <TableColumn fx:id="colNewWtPc"
+                                 text="Wt/Piece"
+                                 prefWidth="90"
+                                 style="-fx-alignment:CENTER-RIGHT;
+                                        -fx-background-color:#f0fdf4;
+                                        -fx-text-fill:#166534;
+                                        -fx-font-weight:bold;"/>
+                </columns>
+            </TableColumn>
+
+        </columns>
+
+        <placeholder>
+            <Label text="No duplicate rows to display."
+                   style="-fx-text-fill:#94a3b8; -fx-font-size:13px;"/>
+        </placeholder>
+    </TableView>
+
+    <!-- ── Action bar ──────────────────────────────────────────── -->
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+
+        <!-- Left: select helpers -->
+        <Button fx:id="btnSelectAll"
+                text="☑  Select All"
+                onAction="#onSelectAll"
+                style="-fx-background-color:white;
+                       -fx-border-color:#94a3b8;
+                       -fx-border-radius:6;
+                       -fx-background-radius:6;
+                       -fx-padding:7 16;
+                       -fx-font-size:12px;
+                       -fx-cursor:hand;"/>
+
+        <Button fx:id="btnDeselectAll"
+                text="☐  Deselect All"
+                onAction="#onDeselectAll"
+                style="-fx-background-color:white;
+                       -fx-border-color:#94a3b8;
+                       -fx-border-radius:6;
+                       -fx-background-radius:6;
+                       -fx-padding:7 16;
+                       -fx-font-size:12px;
+                       -fx-cursor:hand;"/>
+
+        <!-- Spacer -->
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <!-- Skip All -->
+        <Button fx:id="btnSkipAll"
+                text="✖  Skip All Duplicates"
+                onAction="#onSkipAll"
+                style="-fx-background-color:#fef2f2;
+                       -fx-border-color:#fca5a5;
+                       -fx-border-radius:6;
+                       -fx-background-radius:6;
+                       -fx-text-fill:#b91c1c;
+                       -fx-font-weight:bold;
+                       -fx-padding:8 20;
+                       -fx-font-size:12px;
+                       -fx-cursor:hand;"/>
+
+        <!-- Confirm -->
+        <Button fx:id="btnConfirm"
+                text="✔  Confirm Re-Entry"
+                onAction="#onConfirm"
+                defaultButton="true"
+                style="-fx-background-color:linear-gradient(to right,#1e3a8a,#1d4ed8);
+                       -fx-text-fill:white;
+                       -fx-font-weight:bold;
+                       -fx-background-radius:6;
+                       -fx-font-size:13px;
+                       -fx-padding:8 24;
+                       -fx-cursor:hand;"/>
+    </HBox>
+
+</VBox>

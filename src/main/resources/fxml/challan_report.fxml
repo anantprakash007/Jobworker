@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.jobwork.controller.ChallanReportController"
+            styleClass="page-bg">
+
+    <!-- 🔷 HEADER -->
+    <top>
+        <HBox styleClass="page-header-blue" alignment="CENTER_LEFT" spacing="20">
+            <VBox>
+                <Label text="📊 Challan Report" styleClass="page-title"/>
+                <Label text="Dashboard / Reports / Challan" styleClass="breadcrumb"/>
+            </VBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label text="LIVE" styleClass="badge-blue"/>
+        </HBox>
+    </top>
+
+    <!-- 🔷 BODY -->
+    <center>
+        <VBox spacing="15" styleClass="scroll-content">
+
+            <!-- 🔷 FILTER -->
+            <HBox spacing="10" styleClass="filter-bar">
+
+                <ComboBox fx:id="cbWorker" promptText="Select Worker"/>
+                <DatePicker fx:id="dpFrom"/>
+                <DatePicker fx:id="dpTo"/>
+
+                <Button text="Search" onAction="#onSearch" styleClass="btn-primary"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button text="Excel" onAction="#onExcel" styleClass="btn-excel"/>
+                <Button text="PDF" onAction="#onPdf" styleClass="btn-danger"/>
+            </HBox>
+
+            <!-- 🔷 MAIN CARD -->
+            <VBox styleClass="glass-card">
+
+                <!-- HEADER -->
+                <HBox styleClass="card-header-blue">
+                    <Label text="Challan Wise Summary" styleClass="card-title-blue"/>
+                </HBox>
+
+                <!-- TABLE -->
+                <TableView fx:id="tblReport" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colDate" text="Date"/>
+                        <TableColumn fx:id="colChallan" text="Challan"/>
+                        <TableColumn fx:id="colWorker" text="Worker"/>
+                        <TableColumn fx:id="colAmount" text="Amount (₹)"/>
+                    </columns>
+                </TableView>
+
+                <!-- TOTAL -->
+                <HBox alignment="CENTER_RIGHT" styleClass="total-chip-blue">
+                    <VBox>
+                        <Label text="Total Amount" styleClass="total-label"/>
+                        <Label fx:id="lblTotal" text="₹ 0.00" styleClass="total-value"/>
+                    </VBox>
+                </HBox>
+
+            </VBox>
+        </VBox>
+    </center>
+
+</BorderPane>
