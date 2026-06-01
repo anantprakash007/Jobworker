@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!--
+  jobworker_summary.fxml — FINAL CORRECT LAYOUT
+  ══════════════════════════════════════════════════════════════════
+  PROBLEM HISTORY:
+    v1: prefHeight="100000" on TableView → table fills all, footer hidden
+    v2: ScrollPane fitToHeight="true"    → ScrollPane collapses, table tiny
+
+  ROOT CAUSE OF v2 FAILURE:
+    ScrollPane.fitToHeight=true resizes content to viewport, but the
+    viewport height is determined by the ScrollPane's own layout size.
+    When ScrollPane is in a BorderPane CENTER with no explicit height,
+    JavaFX still needs a resolved height to give to the viewport.
+    The inner BorderPane only resolves CENTER height after measuring
+    TOP and BOTTOM. If the content in TOP is taller than expected
+    (filter card + report bar + table header = ~260px) plus BOTTOM
+    (~200px footer), and the window is ~780px, the remaining CENTER
+    is only ~320px — but fitToHeight=true makes ScrollPane shrink the
+    table TO that size rather than giving it a scrollbar to show more.
+    Result: only 1-2 rows visible.
+
+  DEFINITIVE SOLUTION:
+    Use a single outer VBox (root) with explicit VBox.vgrow rules:
+      Row 0: page header          → fixed (vgrow=NEVER)
+      Row 1: filter card          → fixed (vgrow=NEVER)
+      Row 2: report header bar    → fixed (vgrow=NEVER)
+      Row 3: table header bar     → fixed (vgrow=NEVER)
+      Row 4: TableView            → VBox.vgrow=ALWAYS ← gets ALL remaining
+      Row 5: footer totals        → fixed (vgrow=NEVER)
+      Row 6: action buttons       → fixed (vgrow=NEVER)
+
+    VBox distributes height: measures all NEVER rows first, gives
+    the remainder to ALWAYS. TableView then naturally shows as many
+    rows as fit, with a scrollbar appearing when rows exceed space.
+
+    This is the CORRECT pattern for JavaFX when you need:
+      • Fixed header
+      • Growing center (table)
+      • Fixed footer (always visible)
+
+  ALL ROWS VISIBLE + FOOTER ALWAYS VISIBLE:
+    The table uses ALL screen space between filter and footer.
+    When rows > visible → JavaFX TableView built-in virtual scroll.
+    When rows < visible → empty space shown (footer still visible).
+  ══════════════════════════════════════════════════════════════════
+-->
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.jobwork.controller.JobWorkerSummaryController"
+      stylesheets="@/css/style.css"
+      styleClass="page-bg"
+      spacing="0">
+
+    <!-- ══ ROW 0 — Page header (fixed height) ════════════════════ -->
+    <HBox styleClass="page-header-blue" spacing="14" alignment="CENTER_LEFT"
+          VBox.vgrow="NEVER">
+        <VBox spacing="2">
+            <Label text="REPORTS  ›  JOB WORKER" styleClass="breadcrumb"/>
+            <Label text="Job Worker Summary Report" styleClass="page-title"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <!-- 🔥 TOGGLE BUTTON HERE -->
+        <Button fx:id="btnToggle"
+                text="👁 Hide Filters"
+                onAction="#onToggleFilters"
+                styleClass="btn-secondary"/>
+
+        <Label fx:id="lblStatus" text="● Select Worker" styleClass="badge-blue"/>
+    </HBox>
+
+    <!-- ══ ROW 1 — Filter card (fixed height) ════════════════════ -->
+    <VBox fx:id="filterBox" styleClass="glass-card" spacing="12"
+          style="-fx-margin:10 12 0 12;"
+          VBox.vgrow="NEVER">
+        <HBox styleClass="card-header-blue" spacing="10" alignment="CENTER_LEFT">
+            <Label text="🔍" styleClass="icon-blue"/>
+            <VBox spacing="1">
+                <Label text="Search Filters" styleClass="card-title"/>
+                <Label text="Select worker and date range then click Search"
+                       styleClass="card-subtitle"/>
+            </VBox>
+        </HBox>
+        <HBox style="-fx-padding:12 14;" spacing="14" alignment="BOTTOM_LEFT">
+
+            <!-- Job Worker -->
+            <VBox spacing="5">
+                <HBox spacing="5" alignment="CENTER_LEFT">
+                    <Label text="👤" styleClass="icon-blue"/>
+                    <Label text="JOB WORKER  *" styleClass="label-blue"/>
+                </HBox>
+                <ComboBox fx:id="cbWorker"
+                          promptText="Select worker"
+                          prefWidth="200"
+                          styleClass="input-field"/>
+            </VBox>
+
+            <!-- From Date -->
+            <VBox spacing="5">
+                <HBox spacing="5" alignment="CENTER_LEFT">
+                    <Label text="📅" styleClass="icon-blue"/>
+                    <Label text="FROM DATE  *" styleClass="label-blue"/>
+                </HBox>
+                <DatePicker fx:id="dpFrom" prefWidth="145"
+                            styleClass="input-field"/>
+            </VBox>
+
+            <!-- To Date -->
+            <VBox spacing="5">
+                <HBox spacing="5" alignment="CENTER_LEFT">
+                    <Label text="📅" styleClass="icon-blue"/>
+                    <Label text="TO DATE  *" styleClass="label-blue"/>
+                </HBox>
+                <DatePicker fx:id="dpTo" prefWidth="145"
+                            styleClass="input-field"/>
+            </VBox>
+
+            <Button text="🔍  Search"
+                    onAction="#onSearch"
+                    styleClass="btn-primary"
+                    style="-fx-padding:9 20;"/>
+            <Button text="↺  Reset"
+                    onAction="#onReset"
+                    styleClass="btn-secondary"
+                    style="-fx-padding:9 16;"/>
+
+        </HBox>
+    </VBox>
+
+    <!-- ══ ROW 2 — Report header bar (fixed height) ══════════════ -->
+    <HBox styleClass="glass-card" spacing="20" alignment="CENTER_LEFT"
+          style="-fx-padding:8 16;-fx-margin:8 12 0 12;"
+          VBox.vgrow="NEVER">
+        <VBox spacing="2">
+            <Label text="JOB WORKER" styleClass="label-blue"/>
+            <Label fx:id="lblWorkerName" text="—"
+                   style="-fx-font-size:14px;-fx-font-weight:bold;
+                          -fx-text-fill:#0f1b3d;"/>
+        </VBox>
+        <Separator orientation="VERTICAL" prefHeight="32"/>
+        <VBox spacing="2">
+            <Label text="DATE RANGE" styleClass="label-blue"/>
+            <Label fx:id="lblDateRange" text="—"
+                   style="-fx-font-size:12px;-fx-font-weight:bold;
+                          -fx-text-fill:#1e3a8a;"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <VBox spacing="2" alignment="CENTER_RIGHT">
+            <Label text="TOTAL ROWS" styleClass="label-blue"/>
+            <Label fx:id="lblRowCount" text="0"
+                   style="-fx-font-size:14px;-fx-font-weight:bold;
+                          -fx-text-fill:#2563eb;"/>
+        </VBox>
+        <Separator orientation="VERTICAL" prefHeight="32"/>
+        <VBox spacing="2" alignment="CENTER_RIGHT">
+            <Label fx:id="lblTotalWeight" text="Total Wt: 0.00 kg"
+                   styleClass="label-blue"/>
+            <Label fx:id="lblTotalQty" text="Total Qty: 0"
+                   styleClass="label-blue"/>
+        </VBox>
+    </HBox>
+
+    <!-- ══ ROW 3 — Table card header bar (fixed height) ══════════ -->
+    <HBox styleClass="card-header-blue" spacing="10"
+          alignment="CENTER_LEFT"
+          style="-fx-margin:8 12 0 12;"
+          VBox.vgrow="NEVER">
+        <Label text="📋" styleClass="icon-blue"/>
+        <Label text="Product-wise Detail" styleClass="card-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label text="💡 Click Paisa or Rate cell to edit — press Enter to confirm"
+               style="-fx-font-size:10px;-fx-text-fill:#64748b;-fx-font-style:italic;"/>
+    </HBox>
+
+    <!-- ══ ROW 4 — TableView (VBox.vgrow=ALWAYS → fills all space) ══
+         THIS IS THE KEY FIX.
+         VBox.vgrow="ALWAYS" tells JavaFX: after measuring all fixed
+         rows (0,1,2,3,5,6), give ALL remaining height to this row.
+         The TableView then shows as many rows as fit the available
+         space. When rows > available height, JavaFX TableView shows
+         a vertical scrollbar automatically (built-in virtual scroll).
+         NO prefHeight, NO minHeight, NO ScrollPane needed.
+    ════════════════════════════════════════════════════════════════ -->
+    <TableView fx:id="tblSummary"
+               VBox.vgrow="ALWAYS"
+               style="-fx-background-color:white;
+                      -fx-border-color:#dbeafe;
+                      -fx-border-width:0 1.5 0 1.5;">
+        <columns>
+            <TableColumn fx:id="colSlNo"
+                         text="Sl.No"
+                         prefWidth="50"
+                         style="-fx-alignment:CENTER;"/>
+            <TableColumn fx:id="colProductName"
+                         text="Product Name"
+                         prefWidth="160"/>
+            <TableColumn fx:id="colTotalPicks"
+                         text="Total Picks"
+                         prefWidth="86"
+                         style="-fx-alignment:CENTER;"/>
+            <TableColumn fx:id="colLength"
+                         text="Length"
+                         prefWidth="72"
+                         style="-fx-alignment:CENTER;"/>
+            <TableColumn fx:id="colWeight"
+                         text="Wt (kg)"
+                         prefWidth="78"
+                         style="-fx-alignment:CENTER_RIGHT;"/>
+            <TableColumn fx:id="colQuantity"
+                         text="Qt"
+                         prefWidth="62"
+                         style="-fx-alignment:CENTER;"/>
+            <TableColumn fx:id="colUnit"
+                         text="Unit"
+                         prefWidth="62"
+                         style="-fx-alignment:CENTER;"/>
+            <!-- EDITABLE — amber tint set in controller -->
+            <TableColumn fx:id="colPaisa"
+                         text="Paisa (₹) ✎"
+                         prefWidth="95"
+                         style="-fx-alignment:CENTER_RIGHT;"/>
+            <!-- EDITABLE — green tint, Total = Qt × Rate -->
+            <TableColumn fx:id="colRate"
+                         text="Rate (₹) ✎"
+                         prefWidth="92"
+                         style="-fx-alignment:CENTER_RIGHT;"/>
+            <TableColumn fx:id="colTotal"
+                         text="Total (₹)"
+                         prefWidth="102"
+                         style="-fx-alignment:CENTER_RIGHT;"/>
+            <TableColumn fx:id="colStatus" text="Status" prefWidth="120"/>
+
+            <!-- Edit + Delete columns added in initialize() — never in FXML -->
+        </columns>
+        <placeholder>
+            <Label text="No data — select worker and date range, then click Search"
+                   style="-fx-text-fill:#94a3b8;-fx-font-size:13px;
+                          -fx-font-style:italic;"/>
+        </placeholder>
+    </TableView>
+    <!-- ══ RECONCILIATION BAR (NEW) ═══════════════════════════ -->
+    <HBox spacing="25"
+          alignment="CENTER_LEFT"
+          style="-fx-padding:10 16;
+             -fx-background-color:#f1f5f9;
+             -fx-border-color:#dbeafe;
+             -fx-border-width:1.5 1.5 0 1.5;">
+
+        <VBox>
+            <Label text="Total Work"/>
+            <Label fx:id="lblTotalWork" text="₹ 0.00"
+                   style="-fx-font-weight:bold;"/>
+        </VBox>
+
+        <VBox>
+            <Label text="Paid"/>
+            <Label fx:id="lblPaid" text="₹ 0.00"
+                   style="-fx-font-weight:bold;"/>
+        </VBox>
+
+        <VBox>
+            <Label text="Opening Balance"/>
+            <Label fx:id="lblBalance" text="₹ 0.00"
+                   style="-fx-font-weight:bold; -fx-text-fill:red;"/>
+        </VBox>
+
+        <VBox>
+            <Label text="Advance"/>
+            <Label fx:id="lblAdvanceCalc" text="₹ 0.00"
+                   style="-fx-font-weight:bold; -fx-text-fill:blue;"/>
+        </VBox>
+
+        <VBox>
+            <Label text="Net Balance"/>
+            <Label fx:id="lblDifference" text="₹ 0.00"
+                   style="-fx-font-weight:bold;"/>
+        </VBox>
+
+    </HBox>
+    <!-- ══ ROW 5 — Footer totals (fixed height, ALWAYS VISIBLE) ══ -->
+    <VBox style="-fx-background-color:#f8faff;
+                 -fx-border-color:#dbeafe;
+                 -fx-border-width:1.5 1.5 0 1.5;
+                 -fx-padding:10 16;"
+          spacing="8"
+          VBox.vgrow="NEVER">
+
+        <!-- Total (read-only) -->
+        <HBox alignment="CENTER_RIGHT" spacing="14">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Total  :"
+                   style="-fx-font-size:13px;-fx-font-weight:bold;
+                          -fx-text-fill:#1e293b;"/>
+            <Label fx:id="lblTotal" text="₹ 0.00"
+                   style="-fx-font-size:14px;-fx-font-weight:bold;
+                          -fx-text-fill:#1e3a8a;-fx-min-width:140;
+                          -fx-alignment:center-right;"/>
+        </HBox>
+
+        <!-- Advance Money — editable TextField (red tint) -->
+        <HBox alignment="CENTER_RIGHT" spacing="14">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Advance Money (−)  :"
+                   style="-fx-font-size:12px;-fx-text-fill:#dc2626;
+                          -fx-font-weight:bold;"/>
+            <!--
+              Enter/Tab in controller:
+                recalculateFooter()
+                Platform.runLater(() -> tblSummary.requestFocus())
+                event.consume()
+              → focus stays in table, does NOT jump to cbWorker
+            -->
+            <TextField fx:id="tfAdvanceMoney"
+                       text="0.00" prefWidth="140"
+                       style="-fx-font-size:13px;-fx-font-weight:bold;
+                              -fx-text-fill:#dc2626;-fx-alignment:center-right;
+                              -fx-background-color:#fff5f5;
+                              -fx-border-color:#fca5a5;-fx-border-width:1.5;
+                              -fx-border-radius:6;-fx-background-radius:6;
+                              -fx-padding:5 8;"/>
+        </HBox>
+
+        <!-- Previous Money — editable TextField (green tint) -->
+        <HBox alignment="CENTER_RIGHT" spacing="14">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Previous Balance (+)  :"
+                   style="-fx-font-size:12px;-fx-text-fill:#059669;
+                          -fx-font-weight:bold;"/>
+            <TextField fx:id="tfPreviousMoney"
+                       text="0.00" prefWidth="140"
+                       style="-fx-font-size:13px;-fx-font-weight:bold;
+                              -fx-text-fill:#059669;-fx-alignment:center-right;
+                              -fx-background-color:#f0fdf4;
+                              -fx-border-color:#86efac;-fx-border-width:1.5;
+                              -fx-border-radius:6;-fx-background-radius:6;
+                              -fx-padding:5 8;"/>
+        </HBox>
+
+        <Separator style="-fx-border-color:#dbeafe;"/>
+
+        <!-- Grand Total bar -->
+        <HBox alignment="CENTER_RIGHT" spacing="14"
+              style="-fx-background-color:#1e3a8a;
+                     -fx-background-radius:8;-fx-padding:8 12;">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Grand Total  =  Total  −  Advance  +  Previous  :"
+                   style="-fx-font-size:11px;
+                          -fx-text-fill:rgba(255,255,255,0.7);"/>
+            <Label fx:id="lblGrandTotal" text="₹ 0.00"
+                   style="-fx-font-size:17px;-fx-font-weight:bold;
+                          -fx-text-fill:#fcd34d;-fx-min-width:150;
+                          -fx-alignment:center-right;"/>
+        </HBox>
+
+        <!-- Formula note -->
+        <Label text="Formula:  Grand Total  =  Total  −  Advance Money  +  Previous Money"
+               style="-fx-font-size:10px;-fx-text-fill:#64748b;-fx-font-style:italic;"/>
+    </VBox>
+
+    <!-- ══ ROW 6 — Action buttons (fixed height, ALWAYS VISIBLE) ══ -->
+    <HBox spacing="10" alignment="CENTER_LEFT"
+          style="-fx-background-color:white;
+                 -fx-border-color:#dbeafe;
+                 -fx-border-width:1.5 1.5 1.5 1.5;
+                 -fx-padding:12 16;"
+          VBox.vgrow="NEVER">
+
+        <Button text="📄  PDF Report"
+                onAction="#onPdf"
+                styleClass="btn-danger"
+                style="-fx-padding:9 20;"/>
+        <Button text="⊞  Excel"
+                onAction="#onExcel"
+                styleClass="btn-success"
+                style="-fx-padding:9 18;"/>
+        <Button text="🖨  Print"
+                onAction="#onPrint"
+                styleClass="btn-dark"
+                style="-fx-padding:9 18;"/>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <!-- Editable cell legend -->
+        <VBox spacing="3" alignment="CENTER_RIGHT">
+            <Label text="Editable cells:"
+                   style="-fx-font-size:10px;-fx-font-weight:bold;
+                          -fx-text-fill:#64748b;"/>
+            <HBox spacing="6">
+                <Label text="■ Paisa"
+                       style="-fx-font-size:10px;-fx-text-fill:#92400e;
+                              -fx-background-color:#fffbeb;
+                              -fx-padding:2 6;-fx-background-radius:4;"/>
+                <Label text="■ Rate"
+                       style="-fx-font-size:10px;-fx-text-fill:#065f46;
+                              -fx-background-color:#f0fdf4;
+                              -fx-padding:2 6;-fx-background-radius:4;"/>
+                <Label text="■ Advance ₹"
+                       style="-fx-font-size:10px;-fx-text-fill:#dc2626;
+                              -fx-background-color:#fff5f5;
+                              -fx-padding:2 6;-fx-background-radius:4;"/>
+                <Label text="■ Previous ₹"
+                       style="-fx-font-size:10px;-fx-text-fill:#059669;
+                              -fx-background-color:#f0fdf4;
+                              -fx-padding:2 6;-fx-background-radius:4;"/>
+            </HBox>
+        </VBox>
+    </HBox>
+
+</VBox>

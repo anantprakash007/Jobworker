@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!--
+  product_entry.fxml  — FIXED VERSION
+  ─────────────────────────────────────────────────────────────────
+  Changes from previous version:
+  • fx:id="btnAdd" added so controller can update its text
+  • fx:id="btnExit" added so onExit() can close the stage
+  • Wt/Piece column shown in table (was missing prefWidth)
+  • All inline style kept minimal — external style.css drives look
+  • Entry section hint updated to match new validation messages
+  ─────────────────────────────────────────────────────────────────
+-->
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.jobwork.controller.ProductEntryController"
+      stylesheets="@/css/style.css"
+      styleClass="page-bg"
+      spacing="0">
+
+    <!-- ══ PAGE HEADER ═══════════════════════════════════════════ -->
+    <HBox styleClass="page-header-blue" spacing="14" alignment="CENTER_LEFT">
+        <VBox spacing="2">
+            <Label text="Entry of Product"  styleClass="page-title"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="lblStatus" text="● New Entry" styleClass="badge-blue"/>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+        <VBox styleClass="scroll-content" spacing="16">
+
+            <!-- ══ CARD 1 — Worker Information ══════════════════ -->
+            <VBox styleClass="glass-card" spacing="0">
+                <HBox styleClass="card-header-blue" spacing="10" alignment="CENTER_LEFT">
+                    <Label text="👷" styleClass="icon-blue"/>
+                    <VBox spacing="1">
+                        <Label text="Job Worker Information" styleClass="card-title"/>
+                        <Label text="All fields are mandatory *" styleClass="card-subtitle"/>
+                    </VBox>
+                </HBox>
+
+                <VBox styleClass="card-body" spacing="14">
+                    <HBox spacing="16">
+
+                        <!-- Challan No -->
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="🔖" styleClass="icon-dblue"/>
+                                <Label text="CHALLAN NO.  *" styleClass="label-dblue"/>
+                            </HBox>
+                            <TextField fx:id="tfChallanNo"
+                                       promptText="Enter challan number"
+                                       styleClass="input-field"/>
+                        </VBox>
+
+                        <!-- Job Worker Name -->
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="👤" styleClass="icon-blue"/>
+                                <Label text="JOB WORKER NAME  *" styleClass="label-blue"/>
+                            </HBox>
+                            <ComboBox fx:id="cbJobWorker"
+                                      promptText="Select Job worker"
+                                      maxWidth="Infinity"
+                                      styleClass="input-field"/>
+                        </VBox>
+
+                        <!-- Date -->
+                        <VBox spacing="6">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="📅" styleClass="icon-blue"/>
+                                <Label text="DATE  *" styleClass="label-blue"/>
+                            </HBox>
+                            <DatePicker fx:id="dpDate" styleClass="input-field"/>
+                        </VBox>
+
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <!-- ══ CARD 2 — Product Entry Row ═══════════════════ -->
+            <VBox styleClass="glass-card" spacing="0">
+                <HBox styleClass="card-header-blue" spacing="10" alignment="CENTER_LEFT">
+                    <Label text="📦" styleClass="icon-blue"/>
+                    <VBox spacing="1">
+                        <Label text="Product Entry Details" styleClass="card-title"/>
+                        <Label text="Fill all marked (*) fields then click  ＋ Add Row" styleClass="card-subtitle"/>
+                    </VBox>
+                </HBox>
+
+                <VBox styleClass="card-body" spacing="14">
+
+                    <!-- ── Entry input section ── -->
+                    <VBox styleClass="entry-section" spacing="12">
+                        <Label text="─── PRODUCT DETAILS  (Challan, Job Worker, Type, Name, Qty, Unit, Weight are required)"
+                               styleClass="section-hint"/>
+
+                        <HBox spacing="12" alignment="BOTTOM_LEFT">
+
+                            <!-- Product Type -->
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <HBox spacing="6" alignment="CENTER_LEFT">
+                                    <Label text="📦" styleClass="icon-purple"/>
+                                    <Label text="PRODUCT TYPE  *" styleClass="label-purple"/>
+                                </HBox>
+                                <ComboBox fx:id="cbProductType"
+                                          promptText="Select type"
+                                          maxWidth="Infinity"
+                                          styleClass="input-field"
+                                          onAction="#onProductTypeSelected"/>
+                            </VBox>
+
+                            <!-- Product Name (cascades from type) -->
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <HBox spacing="6" alignment="CENTER_LEFT">
+                                    <Label text="🏷️" styleClass="icon-purple"/>
+                                    <Label text="PRODUCT NAME  *" styleClass="label-purple"/>
+                                </HBox>
+                                <ComboBox fx:id="cbProductName"
+                                          promptText="Select name"
+                                          maxWidth="Infinity"
+                                          styleClass="input-field"/>
+                            </VBox>
+
+                            <!-- Quantity -->
+                            <VBox spacing="6" prefWidth="95">
+                                <HBox spacing="6" alignment="CENTER_LEFT">
+                                    <Label text="🔢" styleClass="icon-blue"/>
+                                    <Label text="QTY  *" styleClass="label-blue"/>
+                                </HBox>
+                                <TextField fx:id="tfQuantity"
+                                           promptText="0"
+                                           styleClass="input-field"/>
+                            </VBox>
+
+                            <!-- Unit -->
+                            <VBox spacing="6" prefWidth="105">
+                                <HBox spacing="6" alignment="CENTER_LEFT">
+                                    <Label text="📏" styleClass="icon-blue"/>
+                                    <Label text="UNIT  *" styleClass="label-blue"/>
+                                </HBox>
+                                <ComboBox fx:id="cbUnit"
+                                          promptText="Unit"
+                                          maxWidth="Infinity"
+                                          styleClass="input-field"/>
+                            </VBox>
+
+                            <!-- Weight (kg) -->
+                            <VBox spacing="6" prefWidth="105">
+                                <HBox spacing="6" alignment="CENTER_LEFT">
+                                    <Label text="⚖️" styleClass="icon-blue"/>
+                                    <Label text="WEIGHT  *" styleClass="label-blue"/>
+                                </HBox>
+                                <TextField fx:id="tfWeight"
+                                           promptText="0.00"
+                                           styleClass="input-field"/>
+                            </VBox>
+
+                            <!-- Wt/Piece (optional) -->
+                            <VBox spacing="6" prefWidth="95">
+                                <HBox spacing="6" alignment="CENTER_LEFT">
+                                    <Label text="⚡" styleClass="icon-amber"/>
+                                    <Label text="WT/PIECE" styleClass="label-amber"/>
+                                </HBox>
+                                <TextField fx:id="tfWeightPerPiece"
+                                           promptText="0.00"
+                                           styleClass="input-field"/>
+                            </VBox>
+
+                            <!-- Add Row / Update Row Button (fx:id so controller updates text) -->
+                            <VBox spacing="6" alignment="BOTTOM_LEFT">
+                                <Label text=" "/>
+                                <Button fx:id="btnAdd"
+                                        text="＋  Add Row"
+                                        onAction="#onAdd"
+                                        styleClass="btn-cyan"
+                                        style="-fx-padding:9 18;"/>
+                            </VBox>
+
+                        </HBox>
+                    </VBox>
+
+                    <!-- ── Entry Table — colEditRow + colDeleteRow added by controller ── -->
+                    <TableView fx:id="tblEntries"
+                               VBox.vgrow="ALWAYS"
+                               minHeight="220"
+                               styleClass="table-view">
+                        <columns>
+                            <TableColumn fx:id="colProductType"    text="PRODUCT TYPE" prefWidth="155"/>
+                            <TableColumn fx:id="colProductName"    text="PRODUCT NAME" prefWidth="180"/>
+                            <TableColumn fx:id="colQuantity"       text="QTY"          prefWidth="75"/>
+                            <TableColumn fx:id="colUnit"           text="UNIT"         prefWidth="80"/>
+                            <TableColumn fx:id="colWeight"         text="WT (KG)"      prefWidth="95"/>
+                            <TableColumn fx:id="colWeightPerPiece" text="WT/PIECE"     prefWidth="90"/>
+                            <!-- Edit + Delete columns added ONCE in initialize() — NOT here -->
+                        </columns>
+                        <placeholder>
+                            <Label text="No rows added yet — fill the form above and click  ＋ Add Row"
+                                   styleClass="table-placeholder"/>
+                        </placeholder>
+                    </TableView>
+
+                    <!-- ── Totals bar ── -->
+                    <HBox spacing="14">
+                        <HBox styleClass="total-chip-blue" spacing="12"
+                              alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                            <Label text="📊" style="-fx-font-size:20px;"/>
+                            <VBox spacing="2">
+                                <Label text="TOTAL QUANTITY" styleClass="total-label"/>
+                                <TextField fx:id="tfTotalQty" text="0"
+                                           editable="false"
+                                           styleClass="total-value-field"/>
+                            </VBox>
+                        </HBox>
+                        <HBox styleClass="total-chip-green" spacing="12"
+                              alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                            <Label text="⚖️" style="-fx-font-size:20px;"/>
+                            <VBox spacing="2">
+                                <Label text="TOTAL WEIGHT (KG)" styleClass="total-label"/>
+                                <TextField fx:id="tfTotalWeight" text="0.00"
+                                           editable="false"
+                                           styleClass="total-value-field-green"/>
+                            </VBox>
+                        </HBox>
+                        <HBox styleClass="total-chip-blue" spacing="12"
+                              alignment="CENTER_LEFT">
+                            <Label text="🗂" style="-fx-font-size:20px;"/>
+                            <VBox spacing="2">
+                                <Label text="ROWS" styleClass="total-label"/>
+                                <Label fx:id="lblRowCount" text="0" styleClass="total-value"/>
+                            </VBox>
+                        </HBox>
+                    </HBox>
+
+                    <!-- ── Receipt upload ── -->
+                    <HBox spacing="14" alignment="CENTER_LEFT">
+                        <HBox spacing="6" alignment="CENTER_LEFT">
+                            <Label text="📎" styleClass="icon-green"/>
+                            <Label text="RECEIPT" styleClass="label-green"/>
+                        </HBox>
+                        <Button text="⬆  Upload Receipt"
+                                onAction="#onUploadReceipt"
+                                styleClass="upload-btn"/>
+                        <Label fx:id="lblReceiptFile"
+                               text="No file selected"
+                               styleClass="file-label"/>
+                        <Button fx:id="btnViewReceipt"
+                                text="👁 View"
+                                onAction="#onViewReceipt"
+                                styleClass="btn-outline-blue"
+                                style="-fx-padding:7 14;"
+                                visible="false"/>
+                    </HBox>
+
+                    <Separator styleClass="separator"/>
+
+                    <!-- ── Action Buttons ── -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Button text="📄  PDF"           onAction="#onGeneratePdf"  styleClass="btn-cyan"      style="-fx-padding:9 16;"/>
+                        <Button text="💾  Save"          onAction="#onSave"          styleClass="btn-primary"   style="-fx-padding:9 18;"/>
+                        <Button text="✏  Edit"           onAction="#onEdit"          styleClass="btn-amber"     style="-fx-padding:9 16;"/>
+                        <Button text="↺  Reset"          onAction="#onReset"         styleClass="btn-secondary" style="-fx-padding:9 16;"/>
+                        <!-- fx:id="btnExit" so onExit() can get the Stage reference -->
+                        <Button fx:id="btnExit"
+                                text="✕  Exit"
+                                onAction="#onExit"
+                                styleClass="btn-outline"
+                                style="-fx-padding:9 14;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="✔  Final Submit"   onAction="#onFinalSubmit"   styleClass="btn-success"   style="-fx-padding:9 24;-fx-font-size:14px;"/>
+                        <Button text="📥 Import Excel"
+                                onAction="#onImportExcel"
+                                styleClass="btn-outline-blue"
+                                style="-fx-padding:9 16;"/>
+
+                        <Button text="⊞  Excel"          onAction="#onExcel"         styleClass="btn-outline-blue" style="-fx-padding:9 16;"/>
+                    </HBox>
+
+                </VBox>
+            </VBox>
+
+        </VBox>
+    </ScrollPane>
+</VBox>

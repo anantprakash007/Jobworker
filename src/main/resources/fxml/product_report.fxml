@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.jobwork.controller.ProductReportController"
+      stylesheets="@/css/style.css"
+      style="-fx-background-color:#f0f4ff;" spacing="0">
+
+    <HBox style="-fx-background-color:linear-gradient(to right,#0a1628,#1e3a8a,#2563eb);
+                 -fx-padding:14 24;-fx-alignment:center-left;" spacing="14">
+        <VBox spacing="2">
+            <Label text="REPORTS  ›  PRODUCT"
+                   style="-fx-text-fill:rgba(255,255,255,0.45);-fx-font-size:10px;-fx-font-weight:bold;"/>
+            <Label text="Details Report of Product"
+                   style="-fx-text-fill:white;-fx-font-size:20px;-fx-font-weight:bold;"/>
+        </VBox>
+    </HBox>
+
+    <VBox style="-fx-padding:16;" spacing="14" VBox.vgrow="ALWAYS">
+
+        <!-- Filter Card -->
+        <VBox style="-fx-background-color:white;-fx-border-color:#dbeafe;-fx-border-width:1.5;
+                     -fx-border-radius:14;-fx-background-radius:14;">
+            <HBox styleClass="card-header-plain" spacing="10" alignment="CENTER_LEFT">
+                <Label text="🔍" styleClass="icon-blue"/>
+                <VBox spacing="1">
+                    <Label text="Search Filters" styleClass="card-title"/>
+                    <Label text="Filter by worker, product type, date range or challan" styleClass="card-subtitle"/>
+                </VBox>
+            </HBox>
+            <HBox style="-fx-padding:14 16;" spacing="12" alignment="BOTTOM_LEFT">
+                <VBox spacing="5">
+                    <HBox spacing="5" alignment="CENTER_LEFT">
+                        <Label text="👤" styleClass="icon-blue"/>
+                        <Label text="JOBWORKER" styleClass="label-blue"/>
+                    </HBox>
+                    <ComboBox fx:id="cbWorker" promptText="All workers" prefWidth="150" styleClass="input-field"/>
+                </VBox>
+                <VBox spacing="5">
+                    <HBox spacing="5" alignment="CENTER_LEFT">
+                        <Label text="📦" styleClass="icon-purple"/>
+                        <Label text="PRODUCT TYPE" styleClass="label-purple"/>
+                    </HBox>
+                    <ComboBox fx:id="cbProductType" promptText="All types" prefWidth="130" styleClass="input-field"/>
+                </VBox>
+                <VBox spacing="5">
+                    <HBox spacing="5" alignment="CENTER_LEFT">
+                        <Label text="🏷️" styleClass="icon-purple"/>
+                        <Label text="PRODUCT NAME" styleClass="label-purple"/>
+                    </HBox>
+                    <ComboBox fx:id="cbProductName" promptText="All names" prefWidth="130" styleClass="input-field"/>
+                </VBox>
+                <VBox spacing="5">
+                    <HBox spacing="5" alignment="CENTER_LEFT">
+                        <Label text="📅" styleClass="icon-blue"/>
+                        <Label text="FROM DATE" styleClass="label-blue"/>
+                    </HBox>
+                    <DatePicker fx:id="dpFrom" prefWidth="135" styleClass="input-field"/>
+                </VBox>
+                <VBox spacing="5">
+                    <HBox spacing="5" alignment="CENTER_LEFT">
+                        <Label text="📅" styleClass="icon-blue"/>
+                        <Label text="TO DATE" styleClass="label-blue"/>
+                    </HBox>
+                    <DatePicker fx:id="dpTo" prefWidth="135" styleClass="input-field"/>
+                </VBox>
+                <VBox spacing="5">
+                    <HBox spacing="5" alignment="CENTER_LEFT">
+                        <Label text="🔖" styleClass="icon-dblue"/>
+                        <Label text="CHALLAN NO." styleClass="label-dblue"/>
+                    </HBox>
+                    <TextField fx:id="tfChallanNo" promptText="Search challan..." prefWidth="120" styleClass="input-field"/>
+                </VBox>
+                <Button text="🔍  Search" onAction="#onSearch" styleClass="btn-primary"
+                        style="-fx-padding:9 18;"/>
+            </HBox>
+        </VBox>
+
+        <!-- Results Card -->
+        <VBox VBox.vgrow="ALWAYS"
+              style="-fx-background-color:white;-fx-border-color:#dbeafe;-fx-border-width:1.5;
+                     -fx-border-radius:14;-fx-background-radius:14;">
+            <HBox styleClass="card-header-plain" spacing="10" alignment="CENTER_LEFT">
+                <Label text="📊" styleClass="icon-blue"/>
+                <Label text="Results" styleClass="card-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblTotal" styleClass="label-blue"/>
+            </HBox>
+
+            <!-- colEdit and colDelete added ONLY in ProductReportController.initialize() -->
+            <TableView fx:id="tblReport" VBox.vgrow="ALWAYS"
+                       style="-fx-background-color:white;-fx-border-width:0;
+                              -fx-background-radius:0 0 14 14;">
+                <columns>
+                    <TableColumn fx:id="colDate"        text="Date"        prefWidth="100"/>
+                    <TableColumn fx:id="colChallan"     text="Challan No." prefWidth="110"/>
+                    <TableColumn fx:id="colWorker"      text="Worker"      prefWidth="130"/>
+                    <TableColumn fx:id="colProductName" text="Product"     prefWidth="140"/>
+                    <TableColumn fx:id="colQuantity"    text="Qty"         prefWidth="70"/>
+                    <TableColumn fx:id="colUnit"        text="Unit"        prefWidth="70"/>
+                    <TableColumn fx:id="colWeight"      text="Wt. (kg)"    prefWidth="90"/>
+                    <TableColumn fx:id="colWeightPerPiece" text="Wt/Pc"   prefWidth="80"/>
+                    <TableColumn fx:id="colAmount" text="Amount" prefWidth="80"/>
+                    <!-- colEdit and colDelete added programmatically -->
+                </columns>
+                <placeholder>
+                    <Label text="No entries found — use the search filters above and click Search"
+                           style="-fx-text-fill:#94a3b8;-fx-font-size:13px;-fx-font-style:italic;"/>
+                </placeholder>
+            </TableView>
+
+            <HBox style="-fx-padding:12 16;-fx-border-color:#dbeafe transparent transparent transparent;
+                         -fx-border-width:1 0 0 0;-fx-background-color:#f8faff;
+                         -fx-background-radius:0 0 14 14;" spacing="10" alignment="CENTER_LEFT">
+                <Button text="📄  PDF"                     onAction="#onPdf"               styleClass="btn-danger"/>
+                <Button text="⊞  Excel"                    onAction="#onExcel"             styleClass="btn-success"/>
+                <Button text="📊  Product-wise Summary"    onAction="#onProductWiseSummary" styleClass="btn-purple"/>
+            </HBox>
+        </VBox>
+    </VBox>
+</VBox>

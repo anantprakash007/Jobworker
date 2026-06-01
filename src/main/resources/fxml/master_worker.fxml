@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.jobwork.controller.JobWorkerMasterController"
+      stylesheets="@/css/style.css"
+      style="-fx-background-color:#f0f4ff;" spacing="0">
+
+    <!-- ══ PAGE HEADER ══════════════════════════════════════════ -->
+    <HBox style="-fx-background-color:linear-gradient(to right,#0a1628,#1e3a8a,#2563eb);
+                 -fx-padding:14 24;-fx-alignment:center-left;" spacing="14">
+        <VBox spacing="2">
+            <Label text="MASTERS  ›  JOB WORKERS"
+                   style="-fx-text-fill:rgba(255,255,255,0.45);-fx-font-size:10px;
+                          -fx-font-weight:bold;"/>
+            <Label text="Job Worker Master"
+                   style="-fx-text-fill:white;-fx-font-size:20px;-fx-font-weight:bold;"/>
+        </VBox>
+    </HBox>
+
+    <VBox style="-fx-padding:16;" spacing="14" VBox.vgrow="ALWAYS">
+
+        <!-- ══ Add / Edit Card ══════════════════════════════════ -->
+        <VBox style="-fx-background-color:white;-fx-border-color:#dbeafe;
+                     -fx-border-width:1.5;-fx-border-radius:14;
+                     -fx-background-radius:14;">
+
+            <HBox styleClass="card-header-plain" spacing="10" alignment="CENTER_LEFT">
+                <Label text="➕" styleClass="icon-blue"/>
+                <VBox spacing="1">
+                    <Label text="Add / Edit Job Worker" styleClass="card-title"/>
+                    <Label text="Enter name, phone and address then click Save"
+                           styleClass="card-subtitle"/>
+                </VBox>
+            </HBox>
+
+            <VBox style="-fx-padding:16 18;" spacing="14">
+                <HBox spacing="16">
+
+                    <!-- NAME -->
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <HBox spacing="6" alignment="CENTER_LEFT">
+                            <Label text="👤" styleClass="icon-blue"/>
+                            <Label text="NAME  *" styleClass="label-blue"/>
+                        </HBox>
+                        <TextField fx:id="tfName" promptText="Full name"
+                                   styleClass="input-field"/>
+                    </VBox>
+
+                    <!-- PHONE -->
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <HBox spacing="6" alignment="CENTER_LEFT">
+                            <Label text="📱" styleClass="icon-green"/>
+                            <Label text="PHONE" styleClass="label-green"/>
+                        </HBox>
+                        <TextField fx:id="tfPhone" promptText="Phone number"
+                                   styleClass="input-field"/>
+                    </VBox>
+
+                    <!-- ADDRESS -->
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <HBox spacing="6" alignment="CENTER_LEFT">
+                            <Label text="🏠" styleClass="icon-amber"/>
+                            <Label text="ADDRESS" styleClass="label-amber"/>
+                        </HBox>
+                        <TextField fx:id="tfAddress" promptText="Address"
+                                   styleClass="input-field"/>
+                    </VBox>
+                    <!-- OPENING BALANCE -->
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <HBox spacing="6" alignment="CENTER_LEFT">
+                            <Label text="💰" styleClass="icon-green"/>
+                            <Label text="OPENING BALANCE" styleClass="label-green"/>
+                        </HBox>
+                        <TextField fx:id="tfOpeningBalance"
+                                   promptText="Enter opening balance"
+                                   styleClass="input-field"/>
+                    </VBox>
+
+                </HBox>
+
+                <HBox spacing="10">
+                    <Button text="💾  Save"  onAction="#onSave"  styleClass="btn-primary"/>
+                    <Button text="✕  Clear" onAction="#onReset" styleClass="btn-outline"/>
+                    <Label fx:id="lblStatus" styleClass="status-ok"/>
+                </HBox>
+            </VBox>
+        </VBox>
+
+        <!-- ══ All Job Workers Table ════════════════════════════ -->
+        <VBox VBox.vgrow="ALWAYS"
+              style="-fx-background-color:white;-fx-border-color:#dbeafe;
+                     -fx-border-width:1.5;-fx-border-radius:14;
+                     -fx-background-radius:14;">
+
+            <HBox styleClass="card-header-plain" spacing="10" alignment="CENTER_LEFT">
+                <Label text="👷" styleClass="icon-blue"/>
+                <Label text="All Job Workers" styleClass="card-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblCount" styleClass="count-label"/>
+            </HBox>
+
+            <!--
+              colEdit + colDelete declared here as FXML columns so they map
+              to @FXML fields in the controller — cell factories assigned
+              via GlobalUI.actionColumn().getCellFactory() in initialize().
+              This is identical to the UnitMasterController pattern.
+            -->
+            <TableView fx:id="tblWorkers"
+                       VBox.vgrow="ALWAYS"
+                       style="-fx-background-color:white;-fx-border-width:0;
+                              -fx-background-radius:0 0 14 14;">
+                <columns>
+                    <TableColumn fx:id="colName"    text="NAME"    prefWidth="220"/>
+                    <TableColumn fx:id="colPhone"   text="PHONE"   prefWidth="150"/>
+                    <TableColumn fx:id="colAddress" text="ADDRESS" prefWidth="260"/>
+                    <!-- Cell factories set in initialize() via GlobalUI.actionColumn() -->
+                    <TableColumn fx:id="colEdit"   text="EDIT"   prefWidth="120"/>
+                    <TableColumn fx:id="colDelete" text="DELETE" prefWidth="130"/>
+                </columns>
+                <placeholder>
+                    <Label text="No workers added yet"
+                           style="-fx-text-fill:#94a3b8;-fx-font-style:italic;"/>
+                </placeholder>
+            </TableView>
+
+        </VBox>
+    </VBox>
+</VBox>

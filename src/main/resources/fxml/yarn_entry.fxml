@@ -1,0 +1,571 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!--
+  yarn_entry.fxml — FINAL WORKING VERSION
+  ════════════════════════════════════════════════════════════════════
+  Layout : BorderPane
+    top    → green gradient page header  (always visible)
+    center → ScrollPane with 2 input cards + table + summary bar
+             + yarn-wise summary section
+    bottom → action bar  (always visible — PDF/Save/Edit/Reset/Print/Exit | Final Submit/Excel)
+
+  fx:id map (must match YarnEntryController @FXML fields exactly):
+    lblEntryBadge   cbWorker      cbLocation    tfChallan     dpDate
+    cbBagPiece      wtOfBagsRow   cbWtOfBags    cbYarnCount
+    tfColour        tfNoOfBags    tfNoOfCones   tfNetWeight   lblReceiptFile
+    tblYarn         colSlNo       colBagPiece   colWtOfBags   colYarnCount
+    colColour       colNoOfBags   colNoOfCones  colNetWeight
+    lblTotalQty     lblTotalWeight lblTotalBags lblTotalCones  lblRowCount
+    summarySection  tblSummary    sumColYarnCount sumColBagPiece
+    sumColTotalBags sumColTotalCones sumColTotalWeight
+  ════════════════════════════════════════════════════════════════════
+-->
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.jobwork.controller.YarnEntryController"
+            stylesheets="@/css/style.css"
+            styleClass="page-bg">
+
+    <!-- ══════════════════════════════════════════════════════════
+         TOP — Page header (always visible, never scrolls)
+         ══════════════════════════════════════════════════════════ -->
+    <top>
+        <HBox style="-fx-background-color:linear-gradient(to right,#064e3b,#065f46,#047857);
+                     -fx-padding:14 20;"
+              spacing="14" alignment="CENTER_LEFT">
+            <VBox spacing="3">
+
+                <Label text="Entry Details of Yarn"
+                       style="-fx-text-fill:white;-fx-font-size:20px;-fx-font-weight:bold;"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblEntryBadge" text="● New Entry"
+                   style="-fx-background-color:rgba(255,255,255,0.12);
+                          -fx-border-color:rgba(255,255,255,0.35);
+                          -fx-border-width:1;-fx-border-radius:20;
+                          -fx-background-radius:20;-fx-padding:5 14;
+                          -fx-text-fill:white;-fx-font-size:11px;"/>
+        </HBox>
+    </top>
+
+    <!-- ══════════════════════════════════════════════════════════
+         CENTER — Scrollable content
+         ══════════════════════════════════════════════════════════ -->
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER"
+                    style="-fx-background-color:transparent;
+                           -fx-background:transparent;-fx-border-width:0;">
+            <VBox spacing="14"
+                  style="-fx-padding:14 18 10 18;-fx-background-color:#f0f4ff;">
+
+                <!-- ══════════════════════════════════════════════
+                     CARD 1 — Worker / Location / Challan / Date
+                     ══════════════════════════════════════════════ -->
+                <VBox style="-fx-background-color:white;-fx-border-color:#e2e8f0;
+                             -fx-border-width:1.5;-fx-border-radius:12;
+                             -fx-background-radius:12;" spacing="0">
+
+                    <!-- Card header -->
+                    <HBox style="-fx-background-color:#f0fdf4;
+                                 -fx-border-color:transparent transparent #d1fae5 transparent;
+                                 -fx-border-width:0 0 1 0;
+                                 -fx-padding:9 14;-fx-background-radius:12 12 0 0;"
+                          spacing="10" alignment="CENTER_LEFT">
+                        <Label text="👷" style="-fx-font-size:15px;"/>
+                        <VBox spacing="1">
+                            <Label text="Job Worker, Location &amp; Challan"
+                                   style="-fx-font-size:13px;-fx-font-weight:bold;-fx-text-fill:#064e3b;"/>
+                            <Label text="All fields marked * are mandatory"
+                                   style="-fx-font-size:10px;-fx-text-fill:#6b7280;"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Fields -->
+                    <GridPane hgap="14" vgap="0" style="-fx-padding:12 14;">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="30"/>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="30"/>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="20"/>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="20"/>
+                        </columnConstraints>
+                        <HBox spacing="10">
+                            <Label text="Worker ID"/>
+                            <TextField fx:id="tfWorkerId"
+                                       promptText="Enter ID"
+                                       prefWidth="100"/>
+                        </HBox>
+                        <!-- JOBWORKER NAME -->
+                        <VBox spacing="5" GridPane.columnIndex="0">
+                            <HBox spacing="4" alignment="CENTER_LEFT">
+                                <Label text="👤" style="-fx-font-size:10px;"/>
+                                <Label text="JOB WORKER NAME *"
+                                       style="-fx-font-size:10px;-fx-font-weight:bold;-fx-text-fill:#065f46;"/>
+                            </HBox>
+                            <ComboBox fx:id="cbWorker" promptText="Select worker"
+                                      maxWidth="Infinity" styleClass="input-field"/>
+                        </VBox>
+
+                        <!-- DELIVERY LOCATION -->
+                        <VBox spacing="5" GridPane.columnIndex="1">
+                            <HBox spacing="4" alignment="CENTER_LEFT">
+                                <Label text="📍" style="-fx-font-size:10px;"/>
+                                <Label text="DELIVERY LOCATION *"
+                                       style="-fx-font-size:10px;-fx-font-weight:bold;-fx-text-fill:#dc2626;"/>
+                            </HBox>
+                            <ComboBox fx:id="cbLocation" promptText="Select location"
+                                      maxWidth="Infinity" styleClass="input-field"/>
+                        </VBox>
+
+                        <!-- CHALLAN NO -->
+                        <VBox spacing="5" GridPane.columnIndex="2">
+                            <HBox spacing="4" alignment="CENTER_LEFT">
+                                <Label text="🪪" style="-fx-font-size:10px;"/>
+                                <Label text="CHALLAN NO. *"
+                                       style="-fx-font-size:10px;-fx-font-weight:bold;-fx-text-fill:#6366f1;"/>
+                            </HBox>
+                            <TextField fx:id="tfChallan" promptText="Enter challan no."
+                                       styleClass="text-field"/>
+                        </VBox>
+
+                        <!-- DATE -->
+                        <VBox spacing="5" GridPane.columnIndex="3">
+                            <HBox spacing="4" alignment="CENTER_LEFT">
+                                <Label text="📅" style="-fx-font-size:10px;"/>
+                                <Label text="DATE *"
+                                       style="-fx-font-size:10px;-fx-font-weight:bold;-fx-text-fill:#6366f1;"/>
+                            </HBox>
+                            <DatePicker fx:id="dpDate" maxWidth="Infinity"
+                                        styleClass="input-field"/>
+                        </VBox>
+                    </GridPane>
+                </VBox>
+
+                <!-- ══════════════════════════════════════════════
+                     CARD 2 — Yarn Details input row
+                     ══════════════════════════════════════════════ -->
+                <VBox style="-fx-background-color:white;-fx-border-color:#e2e8f0;
+                             -fx-border-width:1.5;-fx-border-radius:12;
+                             -fx-background-radius:12;" spacing="0">
+
+                    <!-- Card header -->
+                    <HBox style="-fx-background-color:#f0fdf4;
+                                 -fx-border-color:transparent transparent #d1fae5 transparent;
+                                 -fx-border-width:0 0 1 0;
+                                 -fx-padding:9 14;-fx-background-radius:12 12 0 0;"
+                          spacing="10" alignment="CENTER_LEFT">
+                        <Label text="🧵" style="-fx-font-size:15px;"/>
+                        <VBox spacing="1">
+                            <Label text="Yarn Details"
+                                   style="-fx-font-size:13px;-fx-font-weight:bold;-fx-text-fill:#064e3b;"/>
+                            <Label text="Selecting Bag/Piece type enables the relevant count field"
+                                   style="-fx-font-size:10px;-fx-text-fill:#6b7280;"/>
+                        </VBox>
+                    </HBox>
+
+                    <VBox style="-fx-padding:12 14;" spacing="10">
+
+                        <!-- Row A: Bag/Piece | Yarn Count | Colour -->
+                        <GridPane hgap="14" vgap="0">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="ALWAYS" percentWidth="30"/>
+                                <ColumnConstraints hgrow="ALWAYS" percentWidth="40"/>
+                                <ColumnConstraints hgrow="ALWAYS" percentWidth="30"/>
+                            </columnConstraints>
+
+                            <VBox spacing="5" GridPane.columnIndex="0">
+                                <HBox spacing="4" alignment="CENTER_LEFT">
+                                    <Label text="🧺" style="-fx-font-size:10px;"/>
+                                    <Label text="BAG / PIECE *"
+                                           style="-fx-font-size:10px;-fx-font-weight:bold;-fx-text-fill:#6366f1;"/>
+                                </HBox>
+                                <!--
+                                  onAction=#onBagPieceChanged:
+                                   "Bag"   → show wtOfBagsRow, enable tfNoOfBags,  disable tfNoOfCones
+                                   "Piece" → hide wtOfBagsRow, disable tfNoOfBags, enable tfNoOfCones
+                                -->
+                                <ComboBox fx:id="cbBagPiece" promptText="Select type"
+                                          maxWidth="Infinity"
+                                          onAction="#onBagPieceChanged"
+                                          styleClass="input-field"/>
+                            </VBox>
+
+                            <VBox spacing="5" GridPane.columnIndex="1">
+                                <HBox spacing="4" alignment="CENTER_LEFT">
+                                    <Label text="🔢" style="-fx-font-size:10px;"/>
+                                    <Label text="YARN COUNT *"
+                                           style="-fx-font-size:10px;-fx-font-weight:bold;-fx-text-fill:#6366f1;"/>
+                                </HBox>
+                                <!-- ComboBox<YarnType> — items loaded in initialize() -->
+                                <ComboBox fx:id="cbYarnCount" promptText="Select count"
+                                          maxWidth="Infinity" styleClass="input-field"/>
+                            </VBox>
+
+                            <VBox spacing="5" GridPane.columnIndex="2">
+                                <HBox spacing="4" alignment="CENTER_LEFT">
+                                    <Label text="🎨" style="-fx-font-size:10px;"/>
+                                    <Label text="COLOUR *"
+                                           style="-fx-font-size:10px;-fx-font-weight:bold;-fx-text-fill:#f59e0b;"/>
+                                </HBox>
+                                <TextField fx:id="tfColour" promptText="Enter colour"
+                                           styleClass="text-field"/>
+                            </VBox>
+                        </GridPane>
+
+                        <!-- Row B: Wt of Bags — CONDITIONAL (visible only when "Bag") -->
+                        <!--
+                          fx:id="wtOfBagsRow"
+                          managed=false + visible=false by default.
+                          Controller: onBagPieceChanged() sets managed/visible = true when "Bag".
+                          Dropdown options: 50 kg | 60 kg | 70 kg | 75 kg | 90 kg | Custom
+                          onAction=#onWtOfBagsChanged → sets currentWtPerBag,
+                            non-Custom → tfNetWeight read-only + auto-filled
+                            Custom     → tfNetWeight editable
+                        -->
+                        <HBox fx:id="wtOfBagsRow" spacing="14" alignment="CENTER_LEFT"
+                              managed="false" visible="false"
+                              style="-fx-background-color:#fffbeb;
+                                     -fx-border-color:#fde68a;-fx-border-width:1.5;
+                                     -fx-border-radius:8;-fx-background-radius:8;
+                                     -fx-padding:8 12;">
+                            <VBox spacing="5" prefWidth="220">
+                                <HBox spacing="4" alignment="CENTER_LEFT">
+                                    <Label text="⚖️" style="-fx-font-size:10px;"/>
+                                    <Label text="WT OF BAGS *"
+                                           style="-fx-font-size:10px;-fx-font-weight:bold;-fx-text-fill:#065f46;"/>
+                                </HBox>
+                                <ComboBox fx:id="cbWtOfBags"
+                                          promptText="Select bag weight"
+                                          maxWidth="Infinity"
+                                          onAction="#onWtOfBagsChanged"
+                                          styleClass="input-field"/>
+                            </VBox>
+                            <Label text="→ Net Weight auto-fills when bags entered (Bags × Wt/Bag)"
+                                   style="-fx-font-size:10px;-fx-text-fill:#92400e;
+                                          -fx-font-style:italic;"/>
+                        </HBox>
+
+                        <!-- Row C: No. of Bags | No. of Cones | Net Weight | + Add Row -->
+                        <GridPane hgap="14" vgap="0" alignment="BOTTOM_LEFT">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="ALWAYS" percentWidth="26"/>
+                                <ColumnConstraints hgrow="ALWAYS" percentWidth="26"/>
+                                <ColumnConstraints hgrow="ALWAYS" percentWidth="26"/>
+                                <ColumnConstraints hgrow="NEVER" prefWidth="120"/>
+                            </columnConstraints>
+
+                            <!-- NO. OF BAGS — enabled when Bag, disabled when Piece -->
+                            <VBox spacing="5" GridPane.columnIndex="0">
+                                <HBox spacing="4" alignment="CENTER_LEFT">
+                                    <Label text="🧳" style="-fx-font-size:10px;"/>
+                                    <Label text="NO. OF BAGS *"
+                                           style="-fx-font-size:10px;-fx-font-weight:bold;-fx-text-fill:#6366f1;"/>
+                                </HBox>
+                                <!--
+                                  onKeyReleased="#onBagsChanged"
+                                  → triggers autoCalcNetWeight() if currentWtPerBag != null
+                                  → Net Weight = No. of Bags × Wt per Bag
+                                -->
+                                <TextField fx:id="tfNoOfBags" promptText="0"
+                                           onKeyReleased="#onBagsChanged"
+                                           styleClass="text-field" disable="true"/>
+                            </VBox>
+
+                            <!-- NO. OF CONES — enabled when Piece, disabled when Bag -->
+                            <VBox spacing="5" GridPane.columnIndex="1">
+                                <HBox spacing="4" alignment="CENTER_LEFT">
+                                    <Label text="🪀" style="-fx-font-size:10px;"/>
+                                    <Label text="NO. OF CONES *"
+                                           style="-fx-font-size:10px;-fx-font-weight:bold;-fx-text-fill:#6366f1;"/>
+                                </HBox>
+                                <TextField fx:id="tfNoOfCones" promptText="0"
+                                           styleClass="text-field" disable="true"/>
+                            </VBox>
+
+                            <!-- NET WEIGHT — auto-filled for Bag (non-Custom), manual for Piece/Custom -->
+                            <VBox spacing="5" GridPane.columnIndex="2">
+                                <HBox spacing="4" alignment="CENTER_LEFT">
+                                    <Label text="⚖️" style="-fx-font-size:10px;"/>
+                                    <Label text="NET WEIGHT (KG) *"
+                                           style="-fx-font-size:10px;-fx-font-weight:bold;-fx-text-fill:#6366f1;"/>
+                                </HBox>
+                                <TextField fx:id="tfNetWeight" promptText="0.00"
+                                           styleClass="text-field"/>
+                            </VBox>
+
+                            <!-- + ADD ROW BUTTON -->
+                            <VBox GridPane.columnIndex="3" alignment="BOTTOM_LEFT">
+                                <Button text="+ Add Row"
+                                        fx:id="btnAddRow"
+                                        onAction="#onAddRow"
+                                        style="-fx-background-color:linear-gradient(to right,#047857,#059669);
+                                               -fx-text-fill:white;-fx-font-weight:bold;
+                                               -fx-font-size:13px;-fx-padding:9 18;
+                                               -fx-background-radius:8;-fx-border-radius:8;
+                                               -fx-cursor:hand;"/>
+                            </VBox>
+                        </GridPane>
+
+                        <!-- ── Receipt upload ── -->
+                        <HBox spacing="14" alignment="CENTER_LEFT">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="📎" styleClass="icon-green"/>
+                                <Label text="RECEIPT" styleClass="label-green"/>
+                            </HBox>
+                            <Button text="⬆  Upload Receipt"
+                                    onAction="#onUploadReceipt"
+                                    styleClass="upload-btn"/>
+                            <Label fx:id="lblReceiptFile"
+                                   text="No file selected"
+                                   styleClass="file-label"/>
+                            <Button fx:id="btnViewReceipt"
+                                    text="👁 View"
+                                    onAction="#onViewReceipt"
+                                    styleClass="btn-outline-blue"
+                                    style="-fx-padding:7 14;"
+                                    visible="false"/>
+                        </HBox>
+
+                    </VBox>
+                </VBox>
+
+                <!-- ══════════════════════════════════════════════
+                     CARD 3 — Entry Table
+                     Columns: Sl.No | Bag/Piece | Wt/Bag | Yarn Count
+                              | Colour | No.Bags | No.Cones | Net Wt
+                     Edit + Delete columns added in initialize()
+                     ══════════════════════════════════════════════ -->
+                <VBox style="-fx-background-color:white;-fx-border-color:#e2e8f0;
+                             -fx-border-width:1.5;-fx-border-radius:12;
+                             -fx-background-radius:12;" spacing="0">
+
+                    <HBox style="-fx-background-color:linear-gradient(to right,#047857,#059669);
+                                 -fx-padding:8 14;-fx-background-radius:12 12 0 0;"
+                          spacing="10" alignment="CENTER_LEFT">
+                        <Label text="📋" style="-fx-font-size:13px;"/>
+                        <Label text="Yarn Entry Table"
+                               style="-fx-font-size:13px;-fx-font-weight:bold;-fx-text-fill:white;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label text="Fill details above and click + Add Row"
+                               style="-fx-font-size:10px;-fx-text-fill:rgba(255,255,255,0.65);
+                                      -fx-font-style:italic;"/>
+                    </HBox>
+
+                    <TableView fx:id="tblYarn"
+                               prefHeight="260" minHeight="180"
+                               style="-fx-background-color:white;-fx-border-width:0;
+                                      -fx-background-radius:0;">
+                        <columns>
+                            <TableColumn fx:id="colSlNo"
+                                         text="Sl.No"      prefWidth="46"  minWidth="38"
+                                         style="-fx-alignment:CENTER;"/>
+                            <TableColumn fx:id="colBagPiece"
+                                         text="Bag/Piece"  prefWidth="80"  minWidth="65"
+                                         style="-fx-alignment:CENTER;"/>
+                            <!-- colWtOfBags: "50 kg" for Bag rows, blank for Piece rows -->
+                            <TableColumn fx:id="colWtOfBags"
+                                         text="Wt/Bag"     prefWidth="72"  minWidth="58"
+                                         style="-fx-alignment:CENTER;"/>
+                            <TableColumn fx:id="colYarnCount"
+                                         text="Yarn Count" prefWidth="115" minWidth="80"/>
+                            <TableColumn fx:id="colColour"
+                                         text="Colour"     prefWidth="95"  minWidth="70"/>
+                            <!-- colNoOfBags: count for Bag rows; 0/blank for Piece rows -->
+                            <TableColumn fx:id="colNoOfBags"
+                                         text="No. Bags"   prefWidth="82"  minWidth="65"
+                                         style="-fx-alignment:CENTER_RIGHT;"/>
+                            <!-- colNoOfCones: count for Piece rows; 0/blank for Bag rows -->
+                            <TableColumn fx:id="colNoOfCones"
+                                         text="No. Cones"  prefWidth="82"  minWidth="65"
+                                         style="-fx-alignment:CENTER_RIGHT;"/>
+                            <TableColumn fx:id="colNetWeight"
+                                         text="Net Wt (kg)" prefWidth="92" minWidth="70"
+                                         style="-fx-alignment:CENTER_RIGHT;"/>
+                            <!-- Edit + Delete added programmatically in initialize() -->
+                        </columns>
+                        <placeholder>
+                            <VBox alignment="CENTER" spacing="8">
+                                <Label text="🧵"
+                                       style="-fx-font-size:26px;-fx-text-fill:#d1fae5;"/>
+                                <Label text="No rows added yet — fill the form above and click + Add Row"
+                                       style="-fx-text-fill:#94a3b8;-fx-font-size:12px;
+                                              -fx-font-style:italic;"/>
+                            </VBox>
+                        </placeholder>
+                    </TableView>
+                </VBox>
+
+                <!-- ══════════════════════════════════════════════
+                     SUMMARY BAR
+                     Total Quantity | Total Weight | Total Bags | Total Cones | Rows
+                     Updated after every Add Row / Delete
+                     ══════════════════════════════════════════════ -->
+                <HBox spacing="10">
+                    <HBox style="-fx-background-color:#eff6ff;-fx-border-color:#bfdbfe;
+                                 -fx-border-width:1.5;-fx-border-radius:10;
+                                 -fx-background-radius:10;-fx-padding:10 14;"
+                          spacing="10" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                        <Label text="📊" style="-fx-font-size:18px;"/>
+                        <VBox spacing="2">
+                            <Label text="TOTAL QUANTITY"
+                                   style="-fx-font-size:9px;-fx-font-weight:bold;-fx-text-fill:#64748b;"/>
+                            <Label fx:id="lblTotalQty" text="0"
+                                   style="-fx-font-size:20px;-fx-font-weight:bold;-fx-text-fill:#1e3a8a;"/>
+                        </VBox>
+                    </HBox>
+                    <HBox style="-fx-background-color:#f0fdf4;-fx-border-color:#bbf7d0;
+                                 -fx-border-width:1.5;-fx-border-radius:10;
+                                 -fx-background-radius:10;-fx-padding:10 14;"
+                          spacing="10" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                        <Label text="⚖️" style="-fx-font-size:18px;"/>
+                        <VBox spacing="2">
+                            <Label text="TOTAL WEIGHT (KG)"
+                                   style="-fx-font-size:9px;-fx-font-weight:bold;-fx-text-fill:#64748b;"/>
+                            <Label fx:id="lblTotalWeight" text="0.00"
+                                   style="-fx-font-size:20px;-fx-font-weight:bold;-fx-text-fill:#059669;"/>
+                        </VBox>
+                    </HBox>
+                    <HBox style="-fx-background-color:#fefce8;-fx-border-color:#fde68a;
+                                 -fx-border-width:1.5;-fx-border-radius:10;
+                                 -fx-background-radius:10;-fx-padding:10 14;"
+                          spacing="10" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                        <Label text="🧳" style="-fx-font-size:18px;"/>
+                        <VBox spacing="2">
+                            <Label text="TOTAL BAGS"
+                                   style="-fx-font-size:9px;-fx-font-weight:bold;-fx-text-fill:#64748b;"/>
+                            <Label fx:id="lblTotalBags" text="0"
+                                   style="-fx-font-size:20px;-fx-font-weight:bold;-fx-text-fill:#d97706;"/>
+                        </VBox>
+                    </HBox>
+                    <HBox style="-fx-background-color:#fdf4ff;-fx-border-color:#e9d5ff;
+                                 -fx-border-width:1.5;-fx-border-radius:10;
+                                 -fx-background-radius:10;-fx-padding:10 14;"
+                          spacing="10" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                        <Label text="🪀" style="-fx-font-size:18px;"/>
+                        <VBox spacing="2">
+                            <Label text="TOTAL CONES"
+                                   style="-fx-font-size:9px;-fx-font-weight:bold;-fx-text-fill:#64748b;"/>
+                            <Label fx:id="lblTotalCones" text="0"
+                                   style="-fx-font-size:20px;-fx-font-weight:bold;-fx-text-fill:#7c3aed;"/>
+                        </VBox>
+                    </HBox>
+                    <HBox style="-fx-background-color:#fff7ed;-fx-border-color:#fed7aa;
+                                 -fx-border-width:1.5;-fx-border-radius:10;
+                                 -fx-background-radius:10;-fx-padding:10 14;"
+                          spacing="10" alignment="CENTER_LEFT">
+                        <Label text="📝" style="-fx-font-size:18px;"/>
+                        <VBox spacing="2">
+                            <Label text="ROWS"
+                                   style="-fx-font-size:9px;-fx-font-weight:bold;-fx-text-fill:#64748b;"/>
+                            <Label fx:id="lblRowCount" text="0"
+                                   style="-fx-font-size:20px;-fx-font-weight:bold;-fx-text-fill:#ea580c;"/>
+                        </VBox>
+                    </HBox>
+                </HBox>
+
+                <!-- ══════════════════════════════════════════════
+                     YARN-WISE SUMMARY TABLE
+                     hidden by default (managed=false, visible=false)
+                     shown after first Add Row via showSummarySection(true)
+                     Groups by (Yarn Count + Bag/Piece)
+                     Columns: Yarn Count | Type | Total Bags | Total Cones | Total Wt
+                     ══════════════════════════════════════════════ -->
+                <VBox fx:id="summarySection"
+                      managed="false" visible="false"
+                      style="-fx-background-color:white;-fx-border-color:#d1fae5;
+                             -fx-border-width:1.5;-fx-border-radius:12;
+                             -fx-background-radius:12;" spacing="0">
+
+                    <HBox style="-fx-background-color:#064e3b;-fx-padding:8 14;
+                                 -fx-background-radius:12 12 0 0;"
+                          spacing="8" alignment="CENTER_LEFT">
+                        <Label text="📊" style="-fx-font-size:13px;"/>
+                        <Label text="Yarn-wise Summary"
+                               style="-fx-font-size:13px;-fx-font-weight:bold;-fx-text-fill:white;"/>
+                        <Label text="(grouped by Yarn Count + Bag/Piece)"
+                               style="-fx-font-size:10px;-fx-text-fill:rgba(255,255,255,0.55);"/>
+                    </HBox>
+
+                    <TableView fx:id="tblSummary"
+                               prefHeight="140"
+                               style="-fx-background-color:white;-fx-border-width:0;">
+                        <columns>
+                            <TableColumn fx:id="sumColYarnCount"
+                                         text="Yarn Count"    prefWidth="200" minWidth="120"/>
+                            <TableColumn fx:id="sumColBagPiece"
+                                         text="Type"          prefWidth="80"  minWidth="60"
+                                         style="-fx-alignment:CENTER;"/>
+                            <TableColumn fx:id="sumColTotalBags"
+                                         text="Total Bags"    prefWidth="115" minWidth="80"
+                                         style="-fx-alignment:CENTER_RIGHT;"/>
+                            <TableColumn fx:id="sumColTotalCones"
+                                         text="Total Cones"   prefWidth="115" minWidth="80"
+                                         style="-fx-alignment:CENTER_RIGHT;"/>
+                            <TableColumn fx:id="sumColTotalWeight"
+                                         text="Total Wt (kg)" prefWidth="130" minWidth="90"
+                                         style="-fx-alignment:CENTER_RIGHT;"/>
+                        </columns>
+                        <placeholder>
+                            <Label text="Summary appears after rows are added"
+                                   style="-fx-text-fill:#94a3b8;-fx-font-size:11px;"/>
+                        </placeholder>
+                    </TableView>
+                </VBox>
+
+                <Region prefHeight="6"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <!-- ══════════════════════════════════════════════════════════
+         BOTTOM — Action bar (ALWAYS VISIBLE)
+         PDF | Save | Edit | Reset | Print | Exit  ──  Final Submit | Excel
+         ══════════════════════════════════════════════════════════ -->
+    <bottom>
+        <HBox style="-fx-background-color:white;
+                     -fx-border-color:#e2e8f0 transparent transparent transparent;
+                     -fx-border-width:1.5 0 0 0;-fx-padding:10 18;"
+              spacing="8" alignment="CENTER_LEFT">
+
+            <Button text="📄 PDF"          onAction="#onPdf"
+                    style="-fx-background-color:linear-gradient(to right,#dc2626,#ef4444);
+                           -fx-text-fill:white;-fx-font-weight:bold;-fx-font-size:12px;
+                           -fx-padding:8 14;-fx-background-radius:8;-fx-cursor:hand;"/>
+            <Button text="💾 Save"         onAction="#onSave"
+                    style="-fx-background-color:linear-gradient(to right,#1e3a8a,#1d4ed8);
+                           -fx-text-fill:white;-fx-font-weight:bold;-fx-font-size:12px;
+                           -fx-padding:8 14;-fx-background-radius:8;-fx-cursor:hand;"/>
+            <Button text="✏ Edit"          onAction="#onEdit"
+                    style="-fx-background-color:linear-gradient(to right,#d97706,#f59e0b);
+                           -fx-text-fill:white;-fx-font-weight:bold;-fx-font-size:12px;
+                           -fx-padding:8 14;-fx-background-radius:8;-fx-cursor:hand;"/>
+            <Button text="↺ Reset"         onAction="#onReset"
+                    style="-fx-background-color:#334155;-fx-text-fill:white;
+                           -fx-font-weight:bold;-fx-font-size:12px;
+                           -fx-padding:8 12;-fx-background-radius:8;-fx-cursor:hand;"/>
+            <Button text="🖨 Print"        onAction="#onPrint"
+                    style="-fx-background-color:#475569;-fx-text-fill:white;
+                           -fx-font-weight:bold;-fx-font-size:12px;
+                           -fx-padding:8 12;-fx-background-radius:8;-fx-cursor:hand;"/>
+            <Button text="✕ Exit"          onAction="#onExit"
+                    style="-fx-background-color:#f1f5f9;-fx-text-fill:#475569;
+                           -fx-border-color:#e2e8f0;-fx-border-width:1.5;
+                           -fx-font-size:12px;-fx-padding:8 12;
+                           -fx-background-radius:8;-fx-border-radius:8;-fx-cursor:hand;"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Button text="✔ Final Submit"  onAction="#onFinalSubmit"
+                    style="-fx-background-color:linear-gradient(to right,#059669,#10b981);
+                           -fx-text-fill:white;-fx-font-weight:bold;-fx-font-size:13px;
+                           -fx-padding:9 20;-fx-background-radius:8;-fx-cursor:hand;"/>
+            <Button text="📊 Excel"        onAction="#onExcel"
+                    style="-fx-background-color:#16a34a;-fx-text-fill:white;
+                           -fx-font-weight:bold;-fx-font-size:12px;
+                           -fx-padding:9 14;-fx-background-radius:8;-fx-cursor:hand;"/>
+            <Button text="📥  Import Excel" onAction="#onImportExcel" styleClass="btn-cyan"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

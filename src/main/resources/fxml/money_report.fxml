@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.jobwork.controller.MoneyReportController"
+      stylesheets="@/css/style.css"
+      style="-fx-background-color:#f0f4ff;" spacing="0">
+
+    <HBox style="-fx-background-color:linear-gradient(to right,#0a1628,#78350f,#d97706);
+                 -fx-padding:14 24;-fx-alignment:center-left;" spacing="14">
+        <VBox spacing="2">
+            <Label text="REPORTS  ›  MONEY"
+                   style="-fx-text-fill:rgba(255,255,255,0.45);-fx-font-size:10px;-fx-font-weight:bold;"/>
+            <Label text="Report — Money Details"
+                   style="-fx-text-fill:white;-fx-font-size:20px;-fx-font-weight:bold;"/>
+        </VBox>
+    </HBox>
+
+    <VBox style="-fx-padding:16;" spacing="14" VBox.vgrow="ALWAYS">
+
+        <!-- Filter Card -->
+        <VBox style="-fx-background-color:white;-fx-border-color:#fcd34d;-fx-border-width:1.5;
+                     -fx-border-radius:14;-fx-background-radius:14;">
+            <HBox styleClass="card-header-amber" spacing="10" alignment="CENTER_LEFT">
+                <Label text="🔍" styleClass="icon-amber"/>
+                <VBox spacing="1">
+                    <Label text="Search Filters" styleClass="card-title"/>
+                    <Label text="Filter by jobworker, date range or challan number" styleClass="card-subtitle"/>
+                </VBox>
+            </HBox>
+            <HBox style="-fx-padding:14 16;" spacing="14" alignment="BOTTOM_LEFT">
+                <VBox spacing="5">
+                    <HBox spacing="5" alignment="CENTER_LEFT">
+                        <Label text="👤" styleClass="icon-blue"/>
+                        <Label text="JOBWORKER" styleClass="label-blue"/>
+                    </HBox>
+                    <ComboBox fx:id="cbWorker" promptText="All workers" prefWidth="160" styleClass="input-field"/>
+                </VBox>
+                <VBox spacing="5">
+                    <HBox spacing="5" alignment="CENTER_LEFT">
+                        <Label text="📅" styleClass="icon-blue"/>
+                        <Label text="FROM DATE" styleClass="label-blue"/>
+                    </HBox>
+                    <DatePicker fx:id="dpFrom" prefWidth="140" styleClass="input-field"/>
+                </VBox>
+                <VBox spacing="5">
+                    <HBox spacing="5" alignment="CENTER_LEFT">
+                        <Label text="📅" styleClass="icon-blue"/>
+                        <Label text="TO DATE" styleClass="label-blue"/>
+                    </HBox>
+                    <DatePicker fx:id="dpTo" prefWidth="140" styleClass="input-field"/>
+                </VBox>
+                <VBox spacing="5">
+                    <HBox spacing="5" alignment="CENTER_LEFT">
+                        <Label text="🔖" styleClass="icon-dblue"/>
+                        <Label text="CHALLAN NO." styleClass="label-dblue"/>
+                    </HBox>
+                    <TextField fx:id="tfChallanNo" promptText="Enter challan no." prefWidth="140" styleClass="input-field"/>
+                </VBox>
+                <Button text="🔍  Search" onAction="#onSearch" styleClass="btn-amber"
+                        style="-fx-padding:9 18;"/>
+
+            </HBox>
+        </VBox>
+
+        <!-- Results Card -->
+        <VBox VBox.vgrow="ALWAYS"
+              style="-fx-background-color:white;-fx-border-color:#dbeafe;-fx-border-width:1.5;
+                     -fx-border-radius:14;-fx-background-radius:14;">
+            <HBox styleClass="card-header-amber" spacing="10" alignment="CENTER_LEFT">
+                <Label text="💰" styleClass="icon-amber"/>
+                <Label text="Results" styleClass="card-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label text="Total Work:" style="-fx-font-weight:bold;"/>
+
+                <Label fx:id="lblTotalWork"
+                       style="-fx-text-fill:#2563eb; -fx-font-weight:bold;"/>
+
+                <Label text="Paid:" style="-fx-font-weight:bold;"/>
+
+                <Label fx:id="lblTotalPaid"
+                       style="-fx-text-fill:#16a34a; -fx-font-weight:bold;"/>
+
+                <Label text="Balance:" style="-fx-font-weight:bold;"/>
+
+                <Label fx:id="lblBalance"
+                       style="-fx-text-fill:#dc2626; -fx-font-weight:bold;"/>
+            </HBox>
+
+            <!-- colEdit and colDelete added ONLY in MoneyReportController.initialize() -->
+            <TableView fx:id="tblReport" VBox.vgrow="ALWAYS"
+                       styleClass="table-amber"
+                       style="-fx-background-color:white;-fx-border-width:0;
+                              -fx-background-radius:0 0 14 14;">
+                <columns>
+                    <TableColumn fx:id="colDate"    text="Date"        prefWidth="100"/>
+                    <TableColumn fx:id="colChallan" text="Challan No." prefWidth="110"/>
+                    <TableColumn fx:id="colWorker"  text="Job Worker"  prefWidth="150"/>
+                    <TableColumn fx:id="colAmount"  text="Amount (₹)"  prefWidth="120"/>
+                    <TableColumn fx:id="colMode"    text="Mode"        prefWidth="90"/>
+                    <TableColumn fx:id="colRemark"  text="Remark"      prefWidth="140"/>
+                    <!-- 🔥 ADD THIS -->
+
+                    <!-- colEdit and colDelete added programmatically -->
+                </columns>
+                <placeholder>
+                    <Label text="No entries found — use the filters above and click Search"
+                           style="-fx-text-fill:#94a3b8;-fx-font-size:13px;-fx-font-style:italic;"/>
+                </placeholder>
+            </TableView>
+
+            <HBox style="-fx-padding:12 16;-fx-border-color:#fcd34d transparent transparent transparent;
+                         -fx-border-width:1 0 0 0;-fx-background-color:#fffbeb;
+                         -fx-background-radius:0 0 14 14;" spacing="10">
+                <Button text="📄  PDF"    onAction="#onPdf"   styleClass="btn-danger"/>
+                <Button text="⊞  Excel"  onAction="#onExcel" styleClass="btn-success"/>
+            </HBox>
+        </VBox>
+    </VBox>
+</VBox>

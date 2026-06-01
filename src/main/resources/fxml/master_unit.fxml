@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.jobwork.controller.UnitMasterController"
+      stylesheets="@/css/style.css"
+      style="-fx-background-color:#f0f4ff;" spacing="0">
+
+    <HBox style="-fx-background-color:linear-gradient(to right,#0a1628,#065f46,#059669);
+                 -fx-padding:14 24;-fx-alignment:center-left;" spacing="14">
+        <VBox spacing="2">
+            <Label text="MASTERS  ›  UNITS &amp; TYPES"
+                   style="-fx-text-fill:rgba(255,255,255,0.45);-fx-font-size:10px;-fx-font-weight:bold;"/>
+            <Label text="Units, Yarn Types &amp; Delivery Locations"
+                   style="-fx-text-fill:white;-fx-font-size:20px;-fx-font-weight:bold;"/>
+        </VBox>
+    </HBox>
+
+    <!-- Three-panel layout -->
+    <HBox style="-fx-padding:16;" spacing="16" VBox.vgrow="ALWAYS">
+
+        <!-- Units Panel -->
+        <VBox HBox.hgrow="ALWAYS" spacing="0" styleClass="panel-card">
+            <HBox styleClass="panel-header-green" spacing="8" alignment="CENTER_LEFT">
+                <Label text="⚖️" styleClass="icon-green"/>
+                <Label text="Units" styleClass="card-title-green"/>
+            </HBox>
+            <VBox style="-fx-padding:12;" spacing="10">
+                <HBox spacing="8">
+                    <TextField fx:id="tfUnit" promptText="e.g. Piece"
+                               HBox.hgrow="ALWAYS" styleClass="input-field"/>
+                    <Button text="Add" onAction="#onAddUnit"
+                            style="-fx-background-color:linear-gradient(to right,#059669,#047857);
+                                   -fx-text-fill:white;-fx-font-weight:bold;-fx-font-size:13px;
+                                   -fx-padding:8 16;-fx-background-radius:8;-fx-cursor:hand;"/>
+                </HBox>
+                <TableView fx:id="tblUnits" VBox.vgrow="ALWAYS" minHeight="380"
+                           style="-fx-background-color:white;-fx-border-color:#86efac;
+                                  -fx-border-width:1.5;-fx-border-radius:8;-fx-background-radius:8;">
+                    <columns>
+                        <TableColumn fx:id="colUnitName" text="UNIT NAME" prefWidth="160"/>
+                        <TableColumn fx:id="colUnitDel"  text="DELETE"    prefWidth="130"/>
+                    </columns>
+                    <placeholder><Label text="No units yet" style="-fx-text-fill:#94a3b8;-fx-font-style:italic;"/></placeholder>
+                </TableView>
+            </VBox>
+        </VBox>
+
+        <!-- Yarn Types Panel -->
+        <VBox HBox.hgrow="ALWAYS" spacing="0" styleClass="panel-card">
+            <HBox styleClass="panel-header-teal" spacing="8" alignment="CENTER_LEFT">
+                <Label text="🧶" styleClass="icon-teal"/>
+                <Label text="Yarn Types" styleClass="card-title-blue"
+                       style="-fx-text-fill:#0369a1;"/>
+            </HBox>
+            <VBox style="-fx-padding:12;" spacing="10">
+                <HBox spacing="8">
+                    <TextField fx:id="tfYarnType" promptText="e.g. Cotton"
+                               HBox.hgrow="ALWAYS" styleClass="input-field"/>
+                    <Button text="Add" onAction="#onAddYarnType" styleClass="btn-cyan"
+                            style="-fx-padding:8 16;"/>
+                </HBox>
+                <TableView fx:id="tblYarnTypes" VBox.vgrow="ALWAYS" minHeight="380"
+                           styleClass="table-teal"
+                           style="-fx-background-color:white;-fx-border-color:#bae6fd;
+                                  -fx-border-width:1.5;-fx-border-radius:8;-fx-background-radius:8;">
+                    <columns>
+                        <TableColumn fx:id="colYarnName" text="YARN TYPE" prefWidth="160"/>
+                        <TableColumn fx:id="colYarnDel"  text="DELETE"    prefWidth="130"/>
+                    </columns>
+                    <placeholder><Label text="No yarn types yet" style="-fx-text-fill:#94a3b8;-fx-font-style:italic;"/></placeholder>
+                </TableView>
+            </VBox>
+        </VBox>
+
+        <!-- Delivery Locations Panel -->
+        <VBox HBox.hgrow="ALWAYS" spacing="0" styleClass="panel-card">
+            <HBox styleClass="panel-header-amber" spacing="8" alignment="CENTER_LEFT">
+                <Label text="📍" styleClass="icon-amber"/>
+                <Label text="Delivery Locations" styleClass="card-title-amber"/>
+            </HBox>
+            <VBox style="-fx-padding:12;" spacing="10">
+                <HBox spacing="8">
+                    <TextField fx:id="tfLocation" promptText="e.g. Warehouse A"
+                               HBox.hgrow="ALWAYS" styleClass="input-field"/>
+                    <Button text="Add" onAction="#onAddLocation" styleClass="btn-amber"
+                            style="-fx-padding:8 16;"/>
+                </HBox>
+                <TableView fx:id="tblLocations" VBox.vgrow="ALWAYS" minHeight="380"
+                           styleClass="table-amber"
+                           style="-fx-background-color:white;-fx-border-color:#fcd34d;
+                                  -fx-border-width:1.5;-fx-border-radius:8;-fx-background-radius:8;">
+                    <columns>
+                        <TableColumn fx:id="colLocName" text="LOCATION" prefWidth="180"/>
+                        <TableColumn fx:id="colLocDel"  text="DELETE"   prefWidth="130"/>
+                    </columns>
+                    <placeholder><Label text="No locations yet" style="-fx-text-fill:#94a3b8;-fx-font-style:italic;"/></placeholder>
+                </TableView>
+            </VBox>
+        </VBox>
+    </HBox>
+</VBox>

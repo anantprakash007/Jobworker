@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.jobwork.controller.WrapperMasterController"
+      stylesheets="@/css/style.css"
+      style="-fx-background-color:#f0f4ff;" spacing="0">
+
+    <HBox style="-fx-background-color:linear-gradient(to right,#0a1628,#831843,#be185d);
+                 -fx-padding:14 24;-fx-alignment:center-left;" spacing="14">
+        <VBox spacing="2">
+            <Label text="MASTERS  ›  WRAPPERS"
+                   style="-fx-text-fill:rgba(255,255,255,0.45);-fx-font-size:10px;-fx-font-weight:bold;"/>
+            <Label text="Wrapper Master"
+                   style="-fx-text-fill:white;-fx-font-size:20px;-fx-font-weight:bold;"/>
+        </VBox>
+    </HBox>
+
+    <VBox style="-fx-padding:16;" spacing="14" VBox.vgrow="ALWAYS">
+
+        <!-- Add / Edit -->
+        <VBox style="-fx-background-color:white;-fx-border-color:#fbcfe8;-fx-border-width:1.5;
+                     -fx-border-radius:14;-fx-background-radius:14;">
+            <HBox styleClass="card-header-pink" spacing="10" alignment="CENTER_LEFT">
+                <Label text="🧻" styleClass="icon-pink"/>
+                <VBox spacing="1">
+                    <Label text="Add / Edit Wrapper" styleClass="card-title-pink"/>
+                    <Label text="Enter wrapper name and click Save" styleClass="card-subtitle"/>
+                </VBox>
+            </HBox>
+            <HBox style="-fx-padding:16 18;" spacing="12" alignment="BOTTOM_LEFT">
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <HBox spacing="6" alignment="CENTER_LEFT">
+                        <Label text="🧻" styleClass="icon-pink"/>
+                        <Label text="WRAPPER NAME  *" styleClass="label-pink"/>
+                    </HBox>
+                    <TextField fx:id="tfName" promptText="Enter wrapper name..."
+                               style="-fx-background-color:#f8faff;-fx-border-color:#fbcfe8;
+                                      -fx-border-width:1.5;-fx-border-radius:8;-fx-background-radius:8;
+                                      -fx-padding:9 12;-fx-font-size:13px;"/>
+                </VBox>
+                <Button text="💾  Save" onAction="#onSave" styleClass="btn-pink"/>
+                <Button text="✕  Clear" onAction="#onClear" styleClass="btn-outline"/>
+            </HBox>
+            <HBox style="-fx-padding:0 18 12 18;">
+                <Label fx:id="lblStatus" styleClass="status-ok"/>
+            </HBox>
+        </VBox>
+
+        <!-- Table -->
+        <VBox VBox.vgrow="ALWAYS"
+              style="-fx-background-color:white;-fx-border-color:#dbeafe;-fx-border-width:1.5;
+                     -fx-border-radius:14;-fx-background-radius:14;">
+            <HBox styleClass="card-header-pink" spacing="10" alignment="CENTER_LEFT">
+                <Label text="🧻" styleClass="icon-pink"/>
+                <Label text="All Wrappers" styleClass="card-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label text="Search:" styleClass="card-subtitle"/>
+                <TextField fx:id="tfSearch" promptText="Filter by name..." prefWidth="180"
+                           onKeyReleased="#onSearch"
+                           style="-fx-background-color:#f8faff;-fx-border-color:#dbeafe;
+                                  -fx-border-width:1;-fx-border-radius:6;-fx-background-radius:6;
+                                  -fx-padding:5 10;-fx-font-size:12px;"/>
+                <Label fx:id="lblCount" styleClass="count-label"/>
+            </HBox>
+            <TableView fx:id="tblWrappers" VBox.vgrow="ALWAYS"
+                       styleClass="table-pink"
+                       style="-fx-background-color:white;-fx-border-width:0;-fx-background-radius:0 0 14 14;">
+                <columns>
+                    <TableColumn fx:id="colId"     text="ID"           prefWidth="60"/>
+                    <TableColumn fx:id="colName"   text="WRAPPER NAME" prefWidth="320"/>
+                    <TableColumn fx:id="colEdit"   text="EDIT"         prefWidth="80"/>
+                    <TableColumn fx:id="colDelete" text="DELETE"       prefWidth="80"/>
+                </columns>
+                <placeholder>
+                    <Label text="No wrappers added yet" style="-fx-text-fill:#94a3b8;-fx-font-style:italic;"/>
+                </placeholder>
+            </TableView>
+        </VBox>
+    </VBox>
+</VBox>

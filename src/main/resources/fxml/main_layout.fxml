@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.jobwork.controller.MainLayoutController"
+            stylesheets="@/css/style.css">
+           <!-- style="-fx-background-color:#f5f5f5;"> -->
+
+    <!-- ── Top: permanent menu bar ── -->
+    <top>
+        <MenuBar fx:id="menuBar"
+                 style="-fx-background-color:#1a237e; -fx-padding:2 8;">
+
+            <!-- Entry menu -->
+            <Menu text="Entry" style="-fx-text-fill:Black;">
+                <MenuItem text="Product Entry"   onAction="#goProductEntry"/>
+                <MenuItem text="Bheem Entry"     onAction="#goBheemEntry"/>
+                <MenuItem text="Yarn Entry"      onAction="#goYarnEntry"/>
+                <MenuItem text="Money Receipt"   onAction="#goMoneyReceipt"/>
+            </Menu>
+
+            <!-- Reports menu -->
+            <Menu text="Reports" style="-fx-text-fill:Blue;">
+                <MenuItem text="Product Report"  onAction="#goProductReport"/>
+                <MenuItem text="Bheem Report"    onAction="#goBheemReport"/>
+                <MenuItem text="Yarn Report"     onAction="#goYarnReport"/>
+                <MenuItem text="Money Report"    onAction="#goMoneyReport"/>
+            </Menu>
+
+            <!-- Masters menu -->
+            <Menu text="Masters" style="-fx-text-fill:Red;">
+                <MenuItem text="Job Workers"            onAction="#goJobWorkers"/>
+                <MenuItem text="Wrappers"               onAction="#goWrapperMaster"/>
+                <MenuItem text="Product Types / Names"  onAction="#goProductMaster"/>
+                <MenuItem text="Bheem Names / Taar"     onAction="#goBheemMaster"/>
+                <MenuItem text="Units / Yarn Types"     onAction="#goUnitMaster"/>
+            </Menu>
+            <Menu text="Ledger" style="-fx-text-fill:Black;">
+                <MenuItem text="Account Ledger"   onAction="#goAccountLedger"/>
+                <MenuItem text="📋  Job Worker Summary"   onAction="#goWorkerSummary"/>
+                <MenuItem text="📘 Advance Ledger" onAction="#goAdvanceLedger"/>
+                <MenuItem text="📘 Challan  Report" onAction="#goChallanReport"/>
+            </Menu>
+
+        </MenuBar>
+    </top>
+
+    <!-- ── Center: content switches here ── -->
+    <center>
+        <StackPane fx:id="contentArea"
+                   style="-fx-background-color:#f5f5f5;"/>
+    </center>
+
+</BorderPane>

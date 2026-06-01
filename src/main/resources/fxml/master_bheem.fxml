@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.jobwork.controller.BheemMasterController"
+      stylesheets="@/css/style.css"
+      style="-fx-background-color:#f0f4ff;" spacing="0">
+
+    <HBox style="-fx-background-color:linear-gradient(to right,#0a1628,#1e3a8a,#7c3aed);
+                 -fx-padding:14 24;-fx-alignment:center-left;" spacing="14">
+        <VBox spacing="2">
+            <Label text="MASTERS  ›  BHEEM &amp; TAAR"
+                   style="-fx-text-fill:rgba(255,255,255,0.45);-fx-font-size:10px;-fx-font-weight:bold;"/>
+            <Label text="Bheem Name / Taar Master"
+                   style="-fx-text-fill:white;-fx-font-size:20px;-fx-font-weight:bold;"/>
+        </VBox>
+    </HBox>
+
+    <HBox style="-fx-padding:16;" spacing="16" VBox.vgrow="ALWAYS">
+
+        <!-- LEFT: Bheem Names -->
+        <VBox HBox.hgrow="ALWAYS" spacing="0" styleClass="panel-card">
+            <HBox styleClass="panel-header-blue" spacing="8" alignment="CENTER_LEFT">
+                <Label text="🧵" styleClass="icon-blue"/>
+                <Label text="Bheem Names" styleClass="card-title-blue"/>
+            </HBox>
+            <VBox style="-fx-padding:12;" spacing="10">
+                <HBox spacing="8">
+                    <TextField fx:id="tfBheemName" promptText="Bheem name..."
+                               HBox.hgrow="ALWAYS" styleClass="input-field"/>
+                    <Button text="💾  Save" onAction="#onSaveBheemName" styleClass="btn-primary"
+                            style="-fx-padding:8 14;"/>
+                    <Button text="✕" onAction="#onClearBheemName" styleClass="btn-outline"
+                            style="-fx-padding:8 12;"/>
+                </HBox>
+                <Label fx:id="lblBheemStatus" styleClass="status-ok"/>
+                <TableView fx:id="tblBheemNames" VBox.vgrow="ALWAYS" minHeight="380"
+                           onMouseClicked="#onBheemNameSelected"
+                           style="-fx-background-color:white;-fx-border-color:#dbeafe;
+                                  -fx-border-width:1.5;-fx-border-radius:8;-fx-background-radius:8;">
+                    <columns>
+                        <TableColumn fx:id="colBheemId"   text="ID"          prefWidth="55"/>
+                        <TableColumn fx:id="colBheemName" text="BHEEM NAME"  prefWidth="185"/>
+                        <TableColumn fx:id="colBheemEdit" text="EDIT"        prefWidth="120"/>
+                        <TableColumn fx:id="colBheemDel"  text="DELETE"      prefWidth="120"/>
+                    </columns>
+                    <placeholder><Label text="No bheem names yet" style="-fx-text-fill:#94a3b8;-fx-font-style:italic;"/></placeholder>
+                </TableView>
+                <Label fx:id="lblBheemCount" styleClass="count-label"/>
+            </VBox>
+        </VBox>
+
+        <!-- RIGHT: Taar Values -->
+        <VBox HBox.hgrow="ALWAYS" spacing="0" styleClass="panel-card">
+            <HBox styleClass="panel-header-purple" spacing="8" alignment="CENTER_LEFT">
+                <Label text="🔢" styleClass="icon-purple"/>
+                <Label text="Taar Values" styleClass="card-title-purple"/>
+            </HBox>
+            <VBox style="-fx-padding:12;" spacing="10">
+                <Label fx:id="lblSelectedBheem" text="(select a bheem name on the left)"
+                       styleClass="panel-hint"/>
+                <HBox spacing="8">
+                    <TextField fx:id="tfTaarValue" promptText="e.g. 16, 20..."
+                               HBox.hgrow="ALWAYS" styleClass="input-field"/>
+                    <Button text="＋  Add Taar" onAction="#onAddTaar" styleClass="btn-purple"
+                            style="-fx-padding:8 14;"/>
+                    <Button text="✕" onAction="#onClearTaar" styleClass="btn-outline"
+                            style="-fx-padding:8 12;"/>
+                </HBox>
+                <Label fx:id="lblTaarStatus" styleClass="status-ok"/>
+                <TableView fx:id="tblTaars" VBox.vgrow="ALWAYS" minHeight="380"
+                           style="-fx-background-color:white;-fx-border-color:#c4b5fd;
+                                  -fx-border-width:1.5;-fx-border-radius:8;-fx-background-radius:8;">
+                    <columns>
+                        <TableColumn fx:id="colTaarId"    text="ID"     prefWidth="55"/>
+                        <TableColumn fx:id="colTaarValue" text="TAAR"   prefWidth="140"/>
+                        <TableColumn fx:id="colTaarEdit"  text="EDIT"   prefWidth="120"/>
+                        <TableColumn fx:id="colTaarDel"   text="DELETE" prefWidth="120"/>
+                    </columns>
+                    <placeholder><Label text="Select a bheem name on the left" style="-fx-text-fill:#94a3b8;-fx-font-style:italic;"/></placeholder>
+                </TableView>
+                <Label fx:id="lblTaarCount" styleClass="count-label"/>
+            </VBox>
+        </VBox>
+    </HBox>
+</VBox>

@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!--
+  master_product.fxml — UPDATED (Image 1 match)
+  ──────────────────────────────────────────────────────────────────
+  KEY CHANGES from previous version:
+  1. RIGHT PANEL — add-row section now has ALL 7 ProductName fields:
+       Product Name | Pick | Length | Width | Total Picks | Reed | Reed Space
+     These appear as input boxes in the header row (matching screenshot).
+
+  2. RIGHT PANEL — tblNames table now shows all 7 columns:
+       PRODUCT NAME | Pick | Length | Width | Total Picks | Reed | Reed Space
+       plus EDIT (amber "...") and DELETE (red "...") buttons.
+       Both action columns added ONCE programmatically in initialize().
+
+  3. LEFT PANEL — tblTypes table now has EDIT (amber "...") button column
+     in addition to the DELETE button. Both added programmatically.
+
+  RULE: Edit + Delete columns are NEVER defined in FXML — always added
+        once in initialize() via addTypeEditColumn(), addTypeDeleteColumn(),
+        addNameEditColumn(), addNameDeleteColumn().
+  ──────────────────────────────────────────────────────────────────
+-->
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.jobwork.controller.ProductMasterController"
+      stylesheets="@/css/style.css"
+      style="-fx-background-color:#f0f4ff;" spacing="0">
+
+    <!-- ══ PAGE HEADER ══════════════════════════════════════════ -->
+    <HBox style="-fx-background-color:linear-gradient(to right,#0a1628,#1e3a8a,#7c3aed);
+                 -fx-padding:14 24;-fx-alignment:center-left;" spacing="14">
+        <VBox spacing="2">
+            <Label text="MASTERS  ›  PRODUCT"
+                   style="-fx-text-fill:rgba(255,255,255,0.45);-fx-font-size:10px;
+                          -fx-font-weight:bold;"/>
+            <Label text="Product Types &amp; Names"
+                   style="-fx-text-fill:white;-fx-font-size:20px;-fx-font-weight:bold;"/>
+        </VBox>
+    </HBox>
+
+    <!-- ══ TWO-PANEL LAYOUT ══════════════════════════════════════ -->
+    <HBox style="-fx-padding:16;" spacing="16" VBox.vgrow="ALWAYS">
+
+        <!-- ══ LEFT: Product Types ═══════════════════════════════ -->
+        <VBox HBox.hgrow="ALWAYS" spacing="0" styleClass="panel-card"
+              prefWidth="320" maxWidth="340">
+
+            <HBox styleClass="panel-header-blue" spacing="8" alignment="CENTER_LEFT">
+                <Label text="📦" styleClass="icon-blue"/>
+                <Label text="Product Types" styleClass="card-title-blue"/>
+            </HBox>
+
+            <VBox style="-fx-padding:12;" spacing="10">
+
+                <!-- Add new type input -->
+                <HBox spacing="8">
+                    <TextField fx:id="tfTypeName"
+                               promptText="Type name..."
+                               HBox.hgrow="ALWAYS"
+                               styleClass="input-field"/>
+                    <Button text="＋  Add"
+                            onAction="#onAddType"
+                            styleClass="btn-primary"
+                            style="-fx-padding:8 16;"/>
+                </HBox>
+
+                <Label fx:id="lblTypeStatus" styleClass="status-ok"/>
+
+                <!--
+                  Types table — click row to load names on right.
+                  colTypeName only. EDIT + DELETE added programmatically.
+                -->
+                <TableView fx:id="tblTypes"
+                           VBox.vgrow="ALWAYS"
+                           onMouseClicked="#onTypeSelected"
+                           minHeight="400"
+                           style="-fx-background-color:white;
+                                  -fx-border-color:#dbeafe;
+                                  -fx-border-width:1.5;
+                                  -fx-border-radius:8;
+                                  -fx-background-radius:8;">
+                    <columns>
+                        <TableColumn fx:id="colTypeName"
+                                     text="PRODUCT TYPE"
+                                     prefWidth="200"/>
+                        <!-- EDIT + DELETE added in initialize() -->
+                    </columns>
+                    <placeholder>
+                        <Label text="No types yet"
+                               style="-fx-text-fill:#94a3b8;-fx-font-style:italic;"/>
+                    </placeholder>
+                </TableView>
+
+            </VBox>
+        </VBox>
+
+        <!-- ══ RIGHT: Product Names ════════════════════════════════ -->
+        <VBox HBox.hgrow="ALWAYS" spacing="0" styleClass="panel-card">
+
+            <HBox styleClass="panel-header-purple" spacing="8" alignment="CENTER_LEFT">
+                <Label text="🏷️" styleClass="icon-purple"/>
+                <Label fx:id="lblPanelTitle"
+                       text="Names for: (select a type)"
+                       styleClass="card-title-purple"/>
+            </HBox>
+
+            <VBox style="-fx-padding:12;" spacing="10">
+
+                <!-- Hint — updates when type is selected -->
+                <Label fx:id="lblSelectedType"
+                       text="← Click a Product Type on the left to manage its names"
+                       styleClass="panel-hint"/>
+
+                <!--
+                  ADD ROW — 7 fields matching screenshot:
+                  Product Name | Pick | Length | Width | Total Picks | Reed | Reed Space | + Add
+                -->
+                <HBox spacing="6" alignment="BOTTOM_LEFT">
+
+                    <!-- Product Name (widest) -->
+                    <VBox spacing="3" HBox.hgrow="ALWAYS">
+                        <Label text="PRODUCT NAME  *"
+                               style="-fx-font-size:9px;-fx-font-weight:bold;
+                                      -fx-text-fill:#7c3aed;"/>
+                        <TextField fx:id="tfNameValue"
+                                   promptText="e.g. 2.00 Mtr"
+                                   styleClass="input-field"/>
+                    </VBox>
+
+                    <!-- Pick -->
+                    <VBox spacing="3" prefWidth="68">
+                        <Label text="PICK"
+                               style="-fx-font-size:9px;-fx-font-weight:bold;
+                                      -fx-text-fill:#64748b;"/>
+                        <TextField fx:id="tfPick" promptText="Pick"
+                                   styleClass="input-field"/>
+                    </VBox>
+
+                    <!-- Length -->
+                    <VBox spacing="3" prefWidth="78">
+                        <Label text="LENGTH"
+                               style="-fx-font-size:9px;-fx-font-weight:bold;
+                                      -fx-text-fill:#64748b;"/>
+                        <TextField fx:id="tfLength" promptText="Length"
+                                   styleClass="input-field"/>
+                    </VBox>
+
+                    <!-- Width -->
+                    <VBox spacing="3" prefWidth="68">
+                        <Label text="WIDTH"
+                               style="-fx-font-size:9px;-fx-font-weight:bold;
+                                      -fx-text-fill:#64748b;"/>
+                        <TextField fx:id="tfWidth" promptText="Width"
+                                   styleClass="input-field"/>
+                    </VBox>
+
+                    <!-- Total Picks -->
+                    <VBox spacing="3" prefWidth="86">
+                        <Label text="TOTAL PICKS"
+                               style="-fx-font-size:9px;-fx-font-weight:bold;
+                                      -fx-text-fill:#64748b;"/>
+                        <TextField fx:id="tfTotalPicks" promptText="Total Picks"
+                                   styleClass="input-field"/>
+                    </VBox>
+
+                    <!-- Reed -->
+                    <VBox spacing="3" prefWidth="68">
+                        <Label text="REED"
+                               style="-fx-font-size:9px;-fx-font-weight:bold;
+                                      -fx-text-fill:#64748b;"/>
+                        <TextField fx:id="tfReed" promptText="Reed"
+                                   styleClass="input-field"/>
+                    </VBox>
+
+                    <!-- Reed Space -->
+                    <VBox spacing="3" prefWidth="88">
+                        <Label text="REED SPACE"
+                               style="-fx-font-size:9px;-fx-font-weight:bold;
+                                      -fx-text-fill:#64748b;"/>
+                        <TextField fx:id="tfReedSpace" promptText="Reed Space"
+                                   styleClass="input-field"/>
+                    </VBox>
+                    <VBox spacing="3" prefWidth="80">
+                        <Label text="PAISA"/>
+                        <TextField fx:id="tfPaisa" promptText="Paisa"/>
+                    </VBox>
+
+                    <VBox spacing="3" prefWidth="80">
+                        <Label text="RATE"/>
+                        <TextField fx:id="tfRate" promptText="Rate"/>
+                    </VBox>
+                    <!-- + Add button -->
+                    <VBox spacing="3" alignment="BOTTOM_LEFT">
+                        <Label text=" "/>
+                        <Button fx:id="btnAddName"
+                                text="＋  Add"
+                                onAction="#onAddName"
+                                styleClass="btn-purple"
+                                style="-fx-padding:8 14;"/>
+                    </VBox>
+
+                </HBox>
+
+                <Label fx:id="lblNameStatus" styleClass="status-ok"/>
+
+                <!--
+                  Product Names table — 7 data columns.
+                  EDIT + DELETE columns added programmatically in initialize().
+                  Clicking Edit row → opens dialog with all 7 fields pre-filled.
+                -->
+                <TableView fx:id="tblNames"
+                           VBox.vgrow="ALWAYS"
+                           minHeight="400"
+                           style="-fx-background-color:white;
+                                  -fx-border-color:#c4b5fd;
+                                  -fx-border-width:1.5;
+                                  -fx-border-radius:8;
+                                  -fx-background-radius:8;">
+                    <columns>
+                        <TableColumn fx:id="colNameValue"
+                                     text="PRODUCT NAME"
+                                     prefWidth="140"/>
+                        <TableColumn fx:id="colPick"
+                                     text="Pick"
+                                     prefWidth="55"
+                                     style="-fx-alignment:CENTER;"/>
+                        <TableColumn fx:id="colLength"
+                                     text="Length"
+                                     prefWidth="70"
+                                     style="-fx-alignment:CENTER;"/>
+                        <TableColumn fx:id="colWidth"
+                                     text="Width"
+                                     prefWidth="60"
+                                     style="-fx-alignment:CENTER;"/>
+                        <TableColumn fx:id="colTotalPicks"
+                                     text="Total Picks"
+                                     prefWidth="80"
+                                     style="-fx-alignment:CENTER;"/>
+                        <TableColumn fx:id="colReed"
+                                     text="Reed"
+                                     prefWidth="55"
+                                     style="-fx-alignment:CENTER;"/>
+                        <TableColumn fx:id="colReedSpace"
+                                     text="Reed Space"
+                                     prefWidth="80"
+                                     style="-fx-alignment:CENTER;"/>
+                        <!-- ✅ ADD THESE -->
+                        <TableColumn fx:id="colPaisa"
+                                     text="Paisa"
+                                     prefWidth="80"
+                                     style="-fx-alignment:CENTER;"/>
+
+                        <TableColumn fx:id="colRate"
+                                     text="Rate"
+                                     prefWidth="80"
+                                     style="-fx-alignment:CENTER;"/>
+
+                        <!-- EDIT + DELETE added programmatically -->
+                    </columns>
+                    <placeholder>
+                        <Label text="Select a type on the left then add product names"
+                               style="-fx-text-fill:#94a3b8;-fx-font-style:italic;"/>
+                    </placeholder>
+                </TableView>
+
+            </VBox>
+        </VBox>
+
+    </HBox>
+</VBox>

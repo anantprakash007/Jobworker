@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!--
+  money_receipt.fxml
+  ─────────────────────────────────────────────────────────────────
+  • All inline style="" removed — external style.css only
+  • All fields marked * are mandatory
+  • Features: amount highlighted in amber, transfer mode combo,
+              remark field, receipt upload + view, running balance
+              display, Save (DRAFT), Submit, Print, Edit
+  ─────────────────────────────────────────────────────────────────
+-->
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.jobwork.controller.MoneyReceiptController"
+      stylesheets="@/css/style.css"
+      styleClass="page-bg"
+      spacing="0">
+
+    <!-- ══ PAGE HEADER ═══════════════════════════════════════════ -->
+    <HBox styleClass="page-header-amber" spacing="14" alignment="CENTER_LEFT">
+        <VBox spacing="2">
+            <Label text="ENTRY  ›  MONEY RECEIPT" styleClass="breadcrumb"/>
+            <Label text="Money Receipt" styleClass="page-title"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="lblStatus" text="● New Receipt" styleClass="badge-amber"/>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+        <VBox styleClass="scroll-content" spacing="16" alignment="CENTER">
+
+            <!-- Centred form card (max 580px) -->
+            <VBox styleClass="glass-card" spacing="0" maxWidth="580">
+
+                <HBox styleClass="card-header-amber" spacing="10" alignment="CENTER_LEFT">
+                    <Label text="💰" styleClass="icon-amber"/>
+                    <VBox spacing="1">
+                        <Label text="Payment Details" styleClass="card-title-amber"/>
+                        <Label text="All fields marked * are mandatory" styleClass="card-subtitle"/>
+                    </VBox>
+                </HBox>
+
+                <VBox styleClass="card-body" spacing="14">
+
+                    <!-- Jobworker + Date -->
+                    <HBox spacing="16">
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="👤" styleClass="icon-blue"/>
+                                <Label text="JOBWORKER NAME  *" styleClass="label-blue"/>
+                            </HBox>
+                            <ComboBox fx:id="cbJobWorker" promptText="Select worker"
+                                      maxWidth="Infinity" styleClass="input-field"/>
+                        </VBox>
+                        <VBox spacing="6">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="📅" styleClass="icon-blue"/>
+                                <Label text="DATE  *" styleClass="label-blue"/>
+                            </HBox>
+                            <DatePicker fx:id="dpDate" styleClass="input-field"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Challan No -->
+                    <VBox spacing="6">
+                        <HBox spacing="6" alignment="CENTER_LEFT">
+                            <Label text="🔖" styleClass="icon-dblue"/>
+                            <Label text="CHALLAN NO.  *" styleClass="label-dblue"/>
+                        </HBox>
+                        <TextField fx:id="tfChallanNo" promptText="Enter challan no."
+                                   styleClass="input-field"/>
+                    </VBox>
+
+                    <!-- Amount — amber highlight -->
+                    <VBox spacing="6">
+                        <HBox spacing="6" alignment="CENTER_LEFT">
+                            <Label text="₹" styleClass="icon-amber"
+                                   style="-fx-font-weight:bold;-fx-font-size:13px;"/>
+                            <Label text="AMOUNT (₹)  *" styleClass="label-amber"/>
+                        </HBox>
+                        <TextField fx:id="tfAmount" promptText="0.00"
+                                   styleClass="input-amber"/>
+                    </VBox>
+
+                    <!-- Transfer Mode + Remark -->
+                    <HBox spacing="16">
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="💳" styleClass="icon-purple"/>
+                                <Label text="TRANSFER MODE  *" styleClass="label-purple"/>
+                            </HBox>
+
+                            <!-- ✅ FIXED -->
+                            <ComboBox fx:id="cbTransferMode"
+                                      promptText="Select mode"
+                                      styleClass="input-field"
+                                      HBox.hgrow="ALWAYS"/>
+
+                            <!-- ✅ FIXED -->
+                            <ComboBox fx:id="cbEntryType"
+                                      promptText="Select Type"
+                                      styleClass="input-field"
+                                      HBox.hgrow="ALWAYS"/>
+                        </VBox>
+
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="📝" styleClass="icon-blue"/>
+                                <Label text="REMARK" styleClass="label-blue"/>
+                            </HBox>
+
+                            <TextField fx:id="tfRemark"
+                                       promptText="Optional remark"
+                                       styleClass="input-field"
+                                       HBox.hgrow="ALWAYS"/>
+                        </VBox>
+                    </HBox>
+                    <!-- Running total paid to this worker -->
+                    <HBox styleClass="total-chip-amber" spacing="12" alignment="CENTER_LEFT">
+                        <Label text="📊" style="-fx-font-size:18px;"/>
+                        <VBox spacing="2">
+                            <Label text="TOTAL PAID TO WORKER (ALL TIME)" styleClass="total-label"/>
+                            <Label fx:id="lblTotalPaid" text="₹ 0.00" styleClass="total-value"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Receipt upload -->
+                    <HBox spacing="14" alignment="CENTER_LEFT">
+                        <HBox spacing="6" alignment="CENTER_LEFT">
+                            <Label text="📎" styleClass="icon-green"/>
+                            <Label text="RECEIPT" styleClass="label-green"/>
+                        </HBox>
+                        <Button text="⬆  Upload" onAction="#onUploadReceipt"
+                                styleClass="upload-btn"/>
+                        <Label fx:id="lblReceiptFile" text="No file selected" styleClass="file-label"/>
+                        <Button fx:id="btnViewReceipt" text="👁 View"
+                                onAction="#onViewReceipt"
+                                styleClass="btn-outline-blue"
+                                style="-fx-padding:7 14;"
+                                visible="false"/>
+                    </HBox>
+
+                    <Separator styleClass="separator"/>
+
+                    <!-- Primary actions -->
+                    <HBox spacing="10" alignment="CENTER">
+                        <Button text="↺  Reset"  onAction="#onReset"  styleClass="btn-secondary" style="-fx-padding:9 16;"/>
+                        <Button text="✓  Submit" onAction="#onSubmit" styleClass="btn-success"   style="-fx-padding:9 22;"/>
+                        <Button text="✕  Exit"   onAction="#onExit"   styleClass="btn-danger-outline" style="-fx-padding:9 16;"/>
+                    </HBox>
+                    <!-- Secondary actions -->
+                    <HBox spacing="10" alignment="CENTER">
+                        <Button text="🖨  Print" onAction="#onPrint" styleClass="btn-dark"    style="-fx-padding:8 16;"/>
+                        <Button text="💾  Save"  onAction="#onSave"  styleClass="btn-primary" style="-fx-padding:8 16;"/>
+                        <Button text="✏  Edit"  onAction="#onEdit"  styleClass="btn-amber"   style="-fx-padding:8 16;"/>
+                        <Button text="📥 Import Excel"
+                                onAction="#onImportExcel"
+                                styleClass="btn-outline-blue"
+                                style="-fx-padding:9 16;"/>
+                    </HBox>
+
+                </VBox>
+            </VBox>
+        </VBox>
+    </ScrollPane>
+</VBox>

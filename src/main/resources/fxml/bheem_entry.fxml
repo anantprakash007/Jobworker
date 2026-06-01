@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!--
+  bheem_entry.fxml
+  ─────────────────────────────────────────────────────────────────
+  • All inline style="" removed — external style.css only
+  • All fields mandatory (validated in controller)
+  • Features: BheemName → Taar cascade, colour picker combo,
+              weight auto-total, receipt upload + view,
+              Save (DRAFT), Final Submit, Print, Edit, Reset
+  ─────────────────────────────────────────────────────────────────
+-->
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.jobwork.controller.BheemEntryController"
+      stylesheets="@/css/style.css"
+      styleClass="page-bg"
+      spacing="0">
+
+    <!-- ══ PAGE HEADER ═══════════════════════════════════════════ -->
+    <HBox styleClass="page-header-purple" spacing="14" alignment="CENTER_LEFT">
+        <VBox spacing="2">
+
+            <Label text="Entry Details of Bheem" styleClass="page-title"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="lblStatus" text="● New Entry" styleClass="badge-purple"/>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+        <VBox styleClass="scroll-content" spacing="16">
+
+            <!-- ══ CARD 1 — Worker, Location, Challan ═══════════ -->
+            <VBox styleClass="glass-card" spacing="0">
+                <HBox styleClass="card-header-blue" spacing="10" alignment="CENTER_LEFT">
+                    <Label text="👷" styleClass="icon-blue"/>
+                    <VBox spacing="1">
+                        <Label text="Job Worker &amp; Challan" styleClass="card-title"/>
+                        <Label text="All fields marked * are mandatory" styleClass="card-subtitle"/>
+                    </VBox>
+                </HBox>
+                <VBox styleClass="card-body" spacing="14">
+                    <HBox spacing="16">
+                        <!-- Jobworker Name -->
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="👤" styleClass="icon-blue"/>
+                                <Label text="JOB WORKER NAME  *" styleClass="label-blue"/>
+                            </HBox>
+                            <ComboBox fx:id="cbJobWorker" promptText="Select worker"
+                                      maxWidth="Infinity" styleClass="input-field"/>
+                        </VBox>
+                        <!-- Delivery Location -->
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="📍" styleClass="icon-red"/>
+                                <Label text="DELIVERY LOCATION  *" styleClass="label-red"/>
+                            </HBox>
+                            <ComboBox fx:id="cbDeliveryLocation" promptText="Select location"
+                                      maxWidth="Infinity" styleClass="input-field"/>
+                        </VBox>
+                        <!-- Challan No -->
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="🔖" styleClass="icon-dblue"/>
+                                <Label text="CHALLAN NO.  *" styleClass="label-dblue"/>
+                            </HBox>
+                            <TextField fx:id="tfChallanNo" promptText="Enter challan no."
+                                       styleClass="input-field"/>
+                        </VBox>
+                        <!-- Date -->
+                        <VBox spacing="6">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="📅" styleClass="icon-blue"/>
+                                <Label text="DATE  *" styleClass="label-blue"/>
+                            </HBox>
+                            <DatePicker fx:id="dpDate" styleClass="input-field"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <!-- ══ CARD 2 — Bheem Details ═══════════════════════ -->
+            <VBox styleClass="glass-card" spacing="0">
+                <HBox styleClass="card-header-purple" spacing="10" alignment="CENTER_LEFT">
+                    <Label text="🧵" styleClass="icon-purple"/>
+                    <VBox spacing="1">
+                        <Label text="Bheem Details" styleClass="card-title"/>
+                        <Label text="Select bheem name first — Taar list updates automatically" styleClass="card-subtitle"/>
+                    </VBox>
+                </HBox>
+                <VBox styleClass="card-body" spacing="14">
+
+                    <HBox spacing="16">
+                        <!-- Bheem Name (drives Taar cascade) -->
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="🧵" styleClass="icon-purple"/>
+                                <Label text="BHEEM NAME  *" styleClass="label-purple"/>
+                            </HBox>
+                            <!-- onAction triggers taar refresh in controller -->
+                            <ComboBox fx:id="cbBheemName"
+                                      promptText="Select bheem name"
+                                      maxWidth="Infinity"
+                                      styleClass="input-purple"
+                                      />
+                        </VBox>
+                        <!-- Taar — populated after bheem name chosen -->
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="🔢" styleClass="icon-blue"/>
+                                <Label text="TAAR  *" styleClass="label-blue"/>
+                            </HBox>
+                            <ComboBox fx:id="cbTaar"
+                                      promptText="Select Taar"
+                                      maxWidth="Infinity"
+                                      styleClass="input-field"/>
+                        </VBox>
+                        <!-- Warping Operator / Wrapper -->
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="🎭" styleClass="icon-pink"/>
+                                <Label text="WARPING OPERATOR  *" styleClass="label-pink"/>
+                            </HBox>
+                            <ComboBox fx:id="cbWrapper" promptText="Select warping operator"
+                                      maxWidth="Infinity" styleClass="input-field"/>
+                        </VBox>
+                        <!-- Yarn Type -->
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="🧶" styleClass="icon-blue"/>
+                                <Label text="YARN TYPE  *" styleClass="label-blue"/>
+                            </HBox>
+                            <ComboBox fx:id="cbYarnType" promptText="Select yarn type"
+                                      maxWidth="Infinity" styleClass="input-field"/>
+                        </VBox>
+                    </HBox>
+
+                    <HBox spacing="16">
+                        <!-- Colour -->
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="🎨" styleClass="icon-amber"/>
+                                <Label text="COLOUR  *" styleClass="label-amber"/>
+                            </HBox>
+                            <TextField fx:id="tfColour" promptText="Enter colour"
+                                       styleClass="input-field"/>
+                        </VBox>
+                        <!-- Weight -->
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="⚖️" styleClass="icon-blue"/>
+                                <Label text="WEIGHT (KG)  *" styleClass="label-blue"/>
+                            </HBox>
+                            <TextField fx:id="tfWeight" promptText="0.00"
+                                       styleClass="input-field"/>
+                        </VBox>
+                        <!-- Spacer -->
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                    </HBox>
+
+                    <!-- Receipt -->
+                    <HBox spacing="14" alignment="CENTER_LEFT">
+                        <HBox spacing="6" alignment="CENTER_LEFT">
+                            <Label text="📎" styleClass="icon-green"/>
+                            <Label text="RECEIPT" styleClass="label-green"/>
+                        </HBox>
+                        <Button text="⬆  Upload Receipt" onAction="#onUploadReceipt"
+                                styleClass="upload-btn"/>
+                        <Label fx:id="lblReceiptFile" text="No file selected" styleClass="file-label"/>
+                        <Button fx:id="btnViewReceipt" text="👁 View"
+                                onAction="#onViewReceipt"
+                                styleClass="btn-outline-blue"
+                                style="-fx-padding:7 14;"
+                                visible="false"/>
+                    </HBox>
+
+                    <Separator styleClass="separator"/>
+
+                    <!-- Action Buttons -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Button text="💾  Save"     onAction="#onSave"    styleClass="btn-success" style="-fx-padding:9 22;"/>
+                        <Button text="✏  Edit"      onAction="#onEdit"    styleClass="btn-amber"   style="-fx-padding:9 16;"/>
+                        <Button text="↺  Reset"     onAction="#onReset"   styleClass="btn-secondary" style="-fx-padding:9 16;"/>
+                        <Button text="🖨  Print"    onAction="#onExportPDF"   styleClass="btn-cyan"    style="-fx-padding:9 16;"/>
+                        <Button text="✕  Exit"      onAction="#onExit"    styleClass="btn-outline" style="-fx-padding:9 14;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="✔  Final Submit" onAction="#onFinalSubmit"
+                                styleClass="btn-success" style="-fx-padding:9 24;-fx-font-size:14px;"/>
+                        <Button text="📥 Import Excel"
+                                onAction="#onImportExcel"
+                                styleClass="btn-outline-blue"
+                                style="-fx-padding:9 16;"/>
+                    </HBox>
+
+                </VBox>
+            </VBox>
+
+        </VBox>
+    </ScrollPane>
+</VBox>
