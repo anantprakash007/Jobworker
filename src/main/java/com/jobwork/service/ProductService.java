@@ -57,10 +57,9 @@ public class ProductService {
      */
     @Transactional(readOnly = true)
     public boolean isDuplicateQty(Long workerId, String challanNo,
-                                  LocalDate date, String product, BigDecimal qty) {
+                                  LocalDate date, Integer productId, Long currentId) {
 
-        if (workerId == null || challanNo == null || date == null
-                || product == null || qty == null) {
+        if (workerId == null || challanNo == null || date == null || productId == null) {
             return false;
         }
 
@@ -68,8 +67,8 @@ public class ProductService {
                 workerId,
                 challanNo.trim(),
                 date,
-                product.trim().toLowerCase()
-
+                productId,
+                currentId   // 🔥 CRITICAL
         );
 
         return count > 0;
@@ -135,10 +134,18 @@ public class ProductService {
                 nonDuplicates.add(inc); continue;
             }
             ProductEntry existing = existingMap.get(inc.getProductName().getId());
-            if (existing != null)
+            if (existing != null) {
+                // 🔥 CRITICAL FIX → IGNORE SAME RECORD
+                if (inc.getId() != null && existing.getId().equals(inc.getId())) {
+                    nonDuplicates.add(inc);   // ✅ same row → NOT duplicate
+                    continue;
+                }
+
+
                 duplicateRows.add(new DuplicateReviewRow(existing, inc));
-            else
+            } else {
                 nonDuplicates.add(inc);
+            }
         }
 
         log.debug("checkDuplicates → duplicates={} clean={}",

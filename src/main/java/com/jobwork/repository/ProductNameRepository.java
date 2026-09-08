@@ -21,7 +21,10 @@ public interface ProductNameRepository
     boolean existsByProductTypeIdAndNameIgnoreCase(Integer typeId, String name);
     List<ProductName> findByProductType(ProductType type);
     // ✅ Case-insensitive lookup
-    Optional<ProductName> findByNameIgnoreCase(String name);
+    Optional<ProductName> findByNameIgnoreCaseAndProductType_Id(
+            String name,
+            Integer productTypeId
+    );
     //@Query("SELECT LOWER(p.name) FROM ProductName p")
    // List<String> findAllNames();
 }

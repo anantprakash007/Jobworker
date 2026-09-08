@@ -15,7 +15,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
+import com.jobwork.util.JobWorkerComboBoxUtil;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -141,7 +141,11 @@ public class YarnEntryController implements Initializable {
             }
         });
 
-        cbWorker.setItems(FXCollections.observableArrayList(jobWorkerService.findAll()));
+       // cbWorker.setItems(FXCollections.observableArrayList(jobWorkerService.findAll()));
+        JobWorkerComboBoxUtil.setup(
+                cbWorker,
+                jobWorkerService.findAll()
+        );
         cbLocation.setItems(FXCollections.observableArrayList(masterService.findAllLocations()));
         cbYarnCount.setItems(FXCollections.observableArrayList(masterService.findAllYarnTypes()));
         cbBagPiece.setItems(FXCollections.observableArrayList("BAG", "PIECE"));
@@ -218,24 +222,24 @@ public class YarnEntryController implements Initializable {
         setupLiveValidation();
 
 
-        cbWorker.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(JobWorker item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null
-                        ? null
-                        : item.getId() + " - " + item.getName());
-            }
-        });
-        cbWorker.setCellFactory(cb -> new ListCell<>() {
-            @Override
-            protected void updateItem(JobWorker item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null
-                        ? null
-                        : item.getId() + " - " + item.getName());
-            }
-        });
+//        cbWorker.setButtonCell(new ListCell<>() {
+//            @Override
+//            protected void updateItem(JobWorker item, boolean empty) {
+//                super.updateItem(item, empty);
+//                setText(empty || item == null
+//                        ? null
+//                        : item.getName() + " - " + item.getPhone());
+//            }
+//        });
+//        cbWorker.setCellFactory(cb -> new ListCell<>() {
+//            @Override
+//            protected void updateItem(JobWorker item, boolean empty) {
+//                super.updateItem(item, empty);
+//                setText(empty || item == null
+//                        ? null
+//                        : item.getName() + " - " + item.getPhone());
+//            }
+//        });
     }
     private void setupWorkerAutoFetch() {
 

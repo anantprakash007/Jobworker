@@ -5,10 +5,7 @@ import com.jobwork.domain.*;
 
 import com.jobwork.service.JobWorkerService;
 import com.jobwork.service.MoneyService;
-import com.jobwork.util.FileUploadUtil;
-import com.jobwork.util.FormUtil;
-import com.jobwork.util.GlobalUI;
-import com.jobwork.util.ValidationUtil;
+import com.jobwork.util.*;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -95,17 +92,21 @@ public class MoneyReceiptController implements Initializable {
         FormUtil.allowNumeric(tfAmount, true);
         FormUtil.autoSelect(tfChallanNo);
         FormUtil.autoSelect(tfAmount);
-        cbJobWorker.setCellFactory(cb -> new ListCell<>() {
+      /**  cbJobWorker.setCellFactory(cb -> new ListCell<>() {
             @Override
             protected void updateItem(JobWorker item, boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? "" : item.getId() + " - " + item.getName());
             }
         });
-        cbEntryType.setItems(FXCollections.observableArrayList(EntryType.values()));
-
         cbJobWorker.setButtonCell(cbJobWorker.getCellFactory().call(null));
         cbJobWorker.setItems(FXCollections.observableArrayList(workerService.findAll()));
+       */
+        JobWorkerComboBoxUtil.setup(
+                cbJobWorker,
+                workerService.findAll()
+        );
+        cbEntryType.setItems(FXCollections.observableArrayList(EntryType.values()));
         cbTransferMode.setItems(FXCollections.observableArrayList(
                 "CASH","NEFT","UPI","CHEQUE"));
         dpDate.setValue(LocalDate.now());

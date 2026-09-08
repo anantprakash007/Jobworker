@@ -70,29 +70,32 @@ public interface ProductEntryRepository
      * @param workerId   job worker id (Long)
      * @param challan    normalized challan (e.g. "50" not "050")
      * @param date       entry date
-     * @param product    normalized product name (lower-cased)
-     */
-    @Query("""
-            SELECT COUNT(p)
-            FROM   ProductEntry p
-            JOIN   p.productName pn
-            WHERE  p.jobWorker.id            = :workerId
-            AND    LOWER(TRIM(p.challanNo))  = LOWER(TRIM(:challan))
-            AND    p.entryDate               = :date
-            AND    LOWER(TRIM(pn.name))      = LOWER(TRIM(:product))
-            """)
-    long countDuplicateSimple(
-            @Param("workerId") Long      workerId,
-            @Param("challan")  String    challan,
-            @Param("date")     LocalDate date,
-            @Param("product")  String    product);
+     * @param productId   normalized product name (lower-cased)
+ */
+
+   /**  @Query("""
+SELECT COUNT(p)
+FROM ProductEntry p
+JOIN p.productName pn
+WHERE p.jobWorker.id = :workerId
+AND TRIM(p.challanNo) = TRIM(:challan)
+AND p.entryDate = :date
+AND pn.id = :productId
+""")
+    long countDuplicate(
+            Long workerId,
+            String challan,
+            LocalDate date,
+            Integer productId
+    );
+   */
 
     /**
      * OLD countDuplicate — kept for backward compatibility.
      * Do NOT use for new code — use countDuplicateSimple() instead.
      * This version uses FUNCTION('REPLACE') which may fail on some DBs.
      */
-    @Query("""
+   /** @Query("""
             SELECT COUNT(p)
             FROM   ProductEntry p
             JOIN   p.productName pn
@@ -106,7 +109,24 @@ public interface ProductEntryRepository
             @Param("challan")  String    challan,
             @Param("date")     LocalDate date,
             @Param("product")  String    product);
-
+            */
+   @Query("""
+SELECT COUNT(p)
+FROM ProductEntry p
+JOIN p.productName pn
+WHERE p.jobWorker.id = :workerId
+AND TRIM(p.challanNo) = TRIM(:challan)
+AND p.entryDate = :date
+AND pn.id = :productId
+AND (:id IS NULL OR p.id <> :id)
+""")
+   long countDuplicate(
+           Long workerId,
+           String challan,
+           LocalDate date,
+           Integer productId,
+           Long id   // 🔥 NEW PARAM
+   );
     // ════════════════════════════════════════════════════════════
     //  SINGLE + BATCH DUPLICATE FETCH (for display in popup)
     // ════════════════════════════════════════════════════════════

@@ -8,6 +8,7 @@ import com.jobwork.service.JobWorkerSummaryService;
 import com.jobwork.service.MoneyService;
 import com.jobwork.util.ExcelExporter;
 import com.jobwork.util.GlobalUI;
+import com.jobwork.util.JobWorkerComboBoxUtil;
 import com.jobwork.util.PdfExporter;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -136,12 +137,17 @@ public class JobWorkerSummaryController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
 
         // Populate worker dropdown
-        cbWorker.setItems(FXCollections.observableArrayList(
-                workerService.findAll()));
+       // cbWorker.setItems(FXCollections.observableArrayList(
+               // workerService.findAll()));
+
 
         // Default date range: first of current month → today
        // dpFrom.setValue(LocalDate.now().withDayOfMonth(1));
         //dpTo.setValue(LocalDate.now());
+        JobWorkerComboBoxUtil.setup(
+                cbWorker,
+                workerService.findAll()
+        );
 
         colStatus.setCellFactory(col -> new TableCell<>() {
             @Override

@@ -10,23 +10,15 @@ import com.jobwork.service.JobWorkerService;
 import com.jobwork.service.MasterService;
 import com.jobwork.util.ExcelExporter;
 import com.jobwork.util.GlobalUI;
+import com.jobwork.util.JobWorkerComboBoxUtil;
 import com.jobwork.util.PdfExporter;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 
-import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
 import javafx.stage.FileChooser;
@@ -75,7 +67,11 @@ public class BheemReportController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        cbWorker.setItems(FXCollections.observableArrayList(workerService.findAll()));
+       //cbWorker.setItems(FXCollections.observableArrayList(workerService.findAll()));
+        JobWorkerComboBoxUtil.setup(
+                cbWorker,
+                workerService.findAll()
+        );
         cbBheemName.setItems(FXCollections.observableArrayList(masterService.findAllBheemNames()));
         cbWrapper.setItems(FXCollections.observableArrayList(masterService.findAllWrappers()));
 
@@ -277,7 +273,7 @@ public class BheemReportController implements Initializable {
     }
 
     // ── Quality-wise Summary ────────────────────────────────────────────
-    @FXML
+   /** @FXML
     public void onQualityWise() {
         Long wid = cbWorker.getValue() != null ? cbWorker.getValue().getId() : null;
         List<Object[]> summary = bheemService.qualityWiseSummary(wid, dpFrom.getValue(), dpTo.getValue());
@@ -305,6 +301,91 @@ public class BheemReportController implements Initializable {
         GlobalUI.showTextDialog("Quality-wise Summary", sb.toString());
     }
 
+*/
+   @FXML
+   public void onQualityWise() {
+
+       Long wid = cbWorker.getValue() != null ? cbWorker.getValue().getId() : null;
+
+       List<Object[]> summary =
+               bheemService.qualityWiseSummary(wid, dpFrom.getValue(), dpTo.getValue());
+
+       if (summary.isEmpty()) {
+           GlobalUI.warn("No data for the selected filter.");
+           return;
+       }
+
+       showSummaryTable(summary);
+   }
+    private void showSummaryTable(List<Object[]> summary) {
+
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Quality-wise Summary");
+
+        ButtonType okBtn = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().add(okBtn);
+
+        TableView<Object[]> table = new TableView<>();
+
+        TableColumn<Object[], String> colName = new TableColumn<>("Bheem Name");
+        TableColumn<Object[], String> colTaar = new TableColumn<>("Taar");
+        TableColumn<Object[], String> colCount = new TableColumn<>("No of Bheem");
+        TableColumn<Object[], String> colWeight = new TableColumn<>("Total Wt (kg)");
+
+        colName.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue()[0])));
+        colTaar.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue()[1])));
+        colCount.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue()[2])));
+        colWeight.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue()[3])));
+
+        table.getColumns().addAll(colName, colTaar, colCount, colWeight);
+
+        long totalCount = 0;
+        BigDecimal totalWeight = BigDecimal.ZERO;
+
+        for (Object[] row : summary) {
+            long count = row[2] != null ? Long.parseLong(row[2].toString()) : 0;
+            BigDecimal wt = row[3] != null ? new BigDecimal(row[3].toString()) : BigDecimal.ZERO;
+
+            totalCount += count;
+            totalWeight = totalWeight.add(wt);
+        }
+
+        // ADD TOTAL ROW
+        Object[] totalRow = new Object[]{
+                "GRAND TOTAL", "", totalCount, totalWeight
+        };
+
+        List<Object[]> data = new ArrayList<>(summary);
+        data.add(totalRow);
+
+        table.setItems(FXCollections.observableArrayList(data));
+
+        // 🎨 STYLE
+        table.setRowFactory(tv -> new TableRow<>() {
+            @Override
+            protected void updateItem(Object[] item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setStyle("");
+                } else if ("GRAND TOTAL".equals(item[0])) {
+                    setStyle("-fx-background-color:#d1fae5; -fx-font-weight:bold;");
+                } else {
+                    setStyle("-fx-border-color:#e5e7eb; -fx-border-width:0 0 1 0;");
+                }
+            }
+        });
+
+        // ALIGNMENT
+        colCount.setStyle("-fx-alignment:CENTER;");
+        colWeight.setStyle("-fx-alignment:CENTER-RIGHT;");
+
+        table.setPrefHeight(400);
+        table.setPrefWidth(650);
+
+        dialog.getDialogPane().setContent(table);
+        dialog.showAndWait();
+    }
     // ── PDF Export ──────────────────────────────────────────────────────
     @FXML
     public void onPdf() throws IOException {

@@ -8,6 +8,7 @@ import com.jobwork.service.YarnService;
 import com.jobwork.service.YarnTypeService;
 import com.jobwork.util.ExcelExporter;
 import com.jobwork.util.GlobalUI;
+import com.jobwork.util.JobWorkerComboBoxUtil;
 import com.jobwork.util.PdfExporter;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -71,7 +72,11 @@ public class YarnReportController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        cbWorker.setItems(FXCollections.observableArrayList(workerService.findAll()));
+       // cbWorker.setItems(FXCollections.observableArrayList(workerService.findAll()));
+        JobWorkerComboBoxUtil.setup(
+                cbWorker,
+                workerService.findAll()
+        );
         cbYarnCount.setItems(FXCollections.observableArrayList(
                 "", "10s","14s","16s","20s","30s","40s","60s","80s","100s"));
 

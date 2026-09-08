@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import com.jobwork.util.JobWorkerComboBoxUtil;
 
 import java.awt.*;
 import java.io.File;
@@ -67,7 +68,11 @@ public class BheemEntryController implements Initializable {
 
 
         FormUtil.allowDecimal(tfWeight,         3);
-        cbJobWorker.setItems(FXCollections.observableArrayList(workerService.findAll()));
+       // cbJobWorker.setItems(FXCollections.observableArrayList(workerService.findAll()));
+        JobWorkerComboBoxUtil.setup(
+                cbJobWorker,
+                workerService.findAll()
+        );
         cbDeliveryLocation.setItems(FXCollections.observableArrayList(masterService.findAllLocations()));
         cbBheemName.setItems(FXCollections.observableArrayList(masterService.findAllBheemNames()));
         cbWrapper.setItems(FXCollections.observableArrayList(masterService.findAllWrappers()));
@@ -269,6 +274,8 @@ public class BheemEntryController implements Initializable {
 
     @FXML
     public void onReset() {
+        editingId = null;
+        uploadedReceiptPath = null;
         tfChallanNo.clear();
         cbJobWorker.getSelectionModel().clearSelection();
         cbDeliveryLocation.getSelectionModel().clearSelection();
@@ -380,6 +387,26 @@ public class BheemEntryController implements Initializable {
     private void saveWithDuplicateCheck(EntryStatus status) {
 
         BheemEntry incoming = buildEntry(status);
+        // Existing draft update
+        if (editingId != null) {
+
+            incoming.setId(editingId);
+            incoming.setStatus(status);
+
+            bheemService.save(incoming);
+
+            GlobalUI.success(
+                    status == EntryStatus.SUBMITTED
+                            ? "Submitted successfully"
+                            : "Draft updated successfully"
+            );
+
+            if (status == EntryStatus.SUBMITTED) {
+                onReset();
+            }
+
+            return;
+        }
 
         boolean dup = bheemService.isDuplicate(
                 incoming.getJobWorker().getId(),
@@ -391,10 +418,21 @@ public class BheemEntryController implements Initializable {
 
         // ✅ NO DUPLICATE
         if (!dup) {
-            bheemService.save(incoming);
-            GlobalUI.success("Saved successfully");
 
-            if (status == EntryStatus.SUBMITTED) onReset();
+            BheemEntry saved = bheemService.save(incoming);
+
+            editingId = saved.getId();
+
+            GlobalUI.success(
+                    status == EntryStatus.SUBMITTED
+                            ? "Submitted successfully"
+                            : "Draft saved successfully"
+            );
+
+            if (status == EntryStatus.SUBMITTED) {
+                onReset();
+            }
+
             return;
         }
 

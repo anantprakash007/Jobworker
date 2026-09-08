@@ -24,6 +24,7 @@ public class BheemService {
     private final BheemEntryRepository repo;
 
     // ── Write ─────────────────────────────────────────────────────
+    @Transactional
     public BheemEntry save(BheemEntry entry) { return repo.save(entry); }
     public void delete(Long id)              { repo.deleteById(id); }
 

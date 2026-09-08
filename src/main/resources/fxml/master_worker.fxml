@@ -51,9 +51,9 @@
                     <VBox spacing="6" HBox.hgrow="ALWAYS">
                         <HBox spacing="6" alignment="CENTER_LEFT">
                             <Label text="📱" styleClass="icon-green"/>
-                            <Label text="PHONE" styleClass="label-green"/>
+                            <Label text="PHONE *" styleClass="label-green"/>
                         </HBox>
-                        <TextField fx:id="tfPhone" promptText="Phone number"
+                        <TextField fx:id="tfPhone" promptText="10-digit Phone number"
                                    styleClass="input-field"/>
                     </VBox>
 

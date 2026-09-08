@@ -11,6 +11,7 @@ import com.jobwork.service.MasterService;
 import com.jobwork.service.ProductService;
 import com.jobwork.util.ExcelExporter;
 import com.jobwork.util.GlobalUI;
+import com.jobwork.util.JobWorkerComboBoxUtil;
 import com.jobwork.util.PdfExporter;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -79,7 +80,11 @@ public class ProductReportController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        cbWorker.setItems(FXCollections.observableArrayList(workerService.findAll()));
+       // cbWorker.setItems(FXCollections.observableArrayList(workerService.findAll()));
+        JobWorkerComboBoxUtil.setup(
+                cbWorker,
+                workerService.findAll()
+        );
         cbProductType.setItems(FXCollections.observableArrayList(masterService.findAllTypes()));
         cbProductType.valueProperty().addListener((obs, old, type) -> {
             if (type != null)

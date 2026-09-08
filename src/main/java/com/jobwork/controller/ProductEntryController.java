@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-
+import com.jobwork.util.JobWorkerComboBoxUtil;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -137,7 +137,11 @@ public class ProductEntryController implements Initializable {
             }
         });
 
-        cbJobWorker.setItems(FXCollections.observableArrayList(workerService.findAll()));
+        //cbJobWorker.setItems(FXCollections.observableArrayList(workerService.findAll()));
+        JobWorkerComboBoxUtil.setup(
+                cbJobWorker,
+                workerService.findAll()
+        );
         cbProductType.setItems(FXCollections.observableArrayList(masterService.findAllTypes()));
         cbUnit.setItems(FXCollections.observableArrayList(masterService.findAllUnits()));
 
@@ -309,8 +313,8 @@ public class ProductEntryController implements Initializable {
                 worker.getId(),
                 challanNo,
                 date,
-                cbProductName.getValue().getName(),
-                qty
+                cbProductName.getValue().getId(),  // ✅ FIX 1
+                null                                // ✅ FIX 2 (new row)
         );
 
         if (!dup) {

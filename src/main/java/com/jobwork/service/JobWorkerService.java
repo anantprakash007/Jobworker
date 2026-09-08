@@ -11,22 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * JobWorkerService
- * ────────────────────────────────────────────────────────────────
- * Business logic for job worker master operations.
- *
- * Methods used by:
- *  All entry controllers (combo box population):
- *    → findAll()
- *
- *  All report controllers (combo box population):
- *    → findAll()
- *
- *  JobWorkerMasterController (CRUD):
- *    → findAll(), save(), delete(), findByChallanNo(),
- *      existsByChallanNo()
- */
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -36,55 +20,182 @@ public class JobWorkerService {
     private final ProductEntryRepository productRepo;
     private final MoneyReceiptRepository moneyRepo;
 
-    // ── Read operations ──────────────────────────────────────────
+    // ═════════════════════════════════════════════════════════════
+    // READ
+    // ═════════════════════════════════════════════════════════════
 
     /**
-     * All job workers sorted by name.
-     * Loaded into every worker ComboBox across all screens.
+     * CENTRAL Job Worker source.
+     *
+     * Every Entry and Report controller must use this method.
+     *
+     * Result:
+     *     alphabetical by worker name
      */
     @Transactional(readOnly = true)
     public List<JobWorker> findAll() {
         return repo.findAllByOrderByNameAsc();
     }
 
-    /** Find by ID — used by edit dialogs. */
+    /**
+     * Find worker by ID.
+     */
     @Transactional(readOnly = true)
     public Optional<JobWorker> findById(Long id) {
         return repo.findById(id);
     }
 
     /**
-     * Find by challan number (unique) — used for search-by-challan.
-     * Returns Optional.empty() if not found.
+     * Find worker by challan number.
      */
     @Transactional(readOnly = true)
     public Optional<JobWorker> findByChallanNo(String challanNo) {
-        return repo.findByChallanNo(challanNo);
+
+        if (challanNo == null || challanNo.isBlank()) {
+            return Optional.empty();
+        }
+
+        return repo.findByChallanNo(challanNo.trim());
     }
 
     /**
-     * Check duplicate challan — used by JobWorkerMasterController.onSave().
+     * Existing challan duplicate check.
      */
     @Transactional(readOnly = true)
     public boolean existsByChallanNo(String challanNo) {
-        return repo.existsByChallanNo(challanNo);
+
+        if (challanNo == null || challanNo.isBlank()) {
+            return false;
+        }
+
+        return repo.existsByChallanNo(challanNo.trim());
     }
 
-    // ── Write operations ─────────────────────────────────────────
+    /**
+     * Find worker by name.
+     */
+    @Transactional(readOnly = true)
+    public Optional<JobWorker> findByNameIgnoreCase(String name) {
 
-    /** Save or update a job worker. */
+        if (name == null || name.isBlank()) {
+            return Optional.empty();
+        }
+
+        return repo.findByNameIgnoreCase(name.trim());
+    }
+
+    /**
+     * Check duplicate worker name.
+     */
+    @Transactional(readOnly = true)
+    public boolean existsByNameIgnoreCase(String name) {
+
+        if (name == null || name.isBlank()) {
+            return false;
+        }
+
+        return repo.existsByNameIgnoreCase(name.trim());
+    }
+
+    /**
+     * Check duplicate worker name during EDIT.
+     */
+    @Transactional(readOnly = true)
+    public boolean existsByNameIgnoreCaseAndIdNot(
+            String name,
+            Long id) {
+
+        if (name == null || name.isBlank() || id == null) {
+            return false;
+        }
+
+        return repo.existsByNameIgnoreCaseAndIdNot(
+                name.trim(),
+                id
+        );
+    }
+
+    /**
+     * Check duplicate mobile number.
+     */
+    @Transactional(readOnly = true)
+    public boolean existsByPhone(String phone) {
+
+        if (phone == null || phone.isBlank()) {
+            return false;
+        }
+
+        return repo.existsByPhone(phone.trim());
+    }
+
+    /**
+     * Check duplicate mobile number during EDIT.
+     */
+    @Transactional(readOnly = true)
+    public boolean existsByPhoneAndIdNot(
+            String phone,
+            Long id) {
+
+        if (phone == null || phone.isBlank() || id == null) {
+            return false;
+        }
+
+        return repo.existsByPhoneAndIdNot(
+                phone.trim(),
+                id
+        );
+    }
+
+    // ═════════════════════════════════════════════════════════════
+    // WRITE
+    // ═════════════════════════════════════════════════════════════
+
+    /**
+     * Save or update Job Worker.
+     */
     public JobWorker save(JobWorker worker) {
+
+        if (worker == null) {
+            throw new IllegalArgumentException("Worker cannot be null");
+        }
+
+        if (worker.getName() != null) {
+            worker.setName(worker.getName().trim());
+        }
+
+        if (worker.getPhone() != null) {
+            worker.setPhone(worker.getPhone().trim());
+        }
+
+        if (worker.getAddress() != null) {
+            worker.setAddress(worker.getAddress().trim());
+        }
+
         return repo.save(worker);
     }
 
-    /** Hard-delete by ID. */
+    /**
+     * Delete worker.
+     */
     public void deleteById(Long id) {
         repo.deleteById(id);
     }
+
+    /**
+     * Check whether worker already has transactions.
+     */
+    @Transactional(readOnly = true)
     public boolean hasTransactions(Long workerId) {
 
-        boolean hasWork = productRepo.existsByJobWorker_Id(workerId);
-        boolean hasMoney = moneyRepo.existsByJobWorker_Id(workerId);
+        if (workerId == null) {
+            return false;
+        }
+
+        boolean hasWork =
+                productRepo.existsByJobWorker_Id(workerId);
+
+        boolean hasMoney =
+                moneyRepo.existsByJobWorker_Id(workerId);
 
         return hasWork || hasMoney;
     }

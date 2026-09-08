@@ -229,9 +229,41 @@ public class ProductImportService {
 
             // DB duplicate check — FIX 1: use plain JPQL, no FUNCTION()
             try {
-                long count = productRepo.countDuplicateSimple(
-                        r.getWorkerId(), challan, r.getDate(), product);
+                // 🔥 STEP 1: find ProductType
+                ProductType pt = productTypeRepo
+                        .findByNameIgnoreCase(r.getProductType())
+                        .orElse(null);
 
+                if (pt == null) {
+                    r.setStatus("ERROR");
+                    r.setErrorDetail("ProductType not found");
+                    r.setSelected(false);
+                    continue;
+                }
+
+// 🔥 STEP 2: find ProductName using type
+                ProductName pn = productNameRepo
+                        .findByNameIgnoreCaseAndProductType_Id(
+                                r.getProduct(),
+                                pt.getId()
+                        )
+                        .orElse(null);
+
+                if (pn == null) {
+                    r.setStatus("ERROR");
+                    r.setErrorDetail("Product not found for given type");
+                    r.setSelected(false);
+                    continue;
+                }
+
+// 🔥 STEP 3: now safe to use pn
+                long count = productRepo.countDuplicate(
+                        r.getWorkerId(),
+                        challan,
+                        r.getDate(),
+                        pn.getId(),
+                        null   // 🔥 for import (no existing ID)
+                );
                 if (count > 0) {
                     r.setStatus("DUPLICATE");
                     r.setErrorDetail("Already exists in DB");
@@ -268,8 +300,8 @@ public class ProductImportService {
 
         for (ImportRow r : rows) {
 
-            // Skip rows that failed validation
-            if ("ERROR".equalsIgnoreCase(r.getStatus())) continue;
+            // 🔥 ONLY ALLOW VALID ROWS
+            if (!"VALID".equalsIgnoreCase(r.getStatus())) continue;
 
             try {
                 String challan = normalizeChallan(r.getChallan());
@@ -288,11 +320,20 @@ public class ProductImportService {
                                 new IllegalArgumentException(
                                         "ProductType not found: " + r.getProductType()));
 
+
+
                 ProductName pn = productNameRepo
-                        .findByNameIgnoreCase(r.getProduct())
-                        .orElseThrow(() ->
-                                new IllegalArgumentException(
-                                        "ProductName not found: " + r.getProduct()));
+                        .findByNameIgnoreCaseAndProductType_Id(
+                                r.getProduct(),
+                                pt.getId()
+                        )
+                        .orElse(null);
+
+                if (pn == null) {
+                    r.setStatus("ERROR");
+                    r.setErrorDetail("Product not found for given type");
+                    continue;
+                }
 
                 Unit unit = unitRepo
                         .findByNameIgnoreCase(r.getUnit())
