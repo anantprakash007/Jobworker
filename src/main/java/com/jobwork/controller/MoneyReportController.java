@@ -19,6 +19,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -47,6 +48,8 @@ public class MoneyReportController implements Initializable {
   @FXML private TableColumn<MoneyReceipt, String> colAmount;
   @FXML private TableColumn<MoneyReceipt, String> colMode;
   @FXML private TableColumn<MoneyReceipt, String> colRemark;
+  //    @FXML private TableColumn<MoneyReceipt, Void> colEdit;
+  //    @FXML private TableColumn<MoneyReceipt, Void> colDelete;
 
   @FXML private Label lblTotalWork;
   @FXML private Label lblTotalPaid;
@@ -113,7 +116,7 @@ public class MoneyReportController implements Initializable {
 
     addEditColumn();
     addDeleteColumn();
-    addRestoreColumn();
+    //    addRestoreColumn();
   }
 
   // ================= SEARCH =================
@@ -164,62 +167,72 @@ public class MoneyReportController implements Initializable {
 
   // ================= EDIT =================
   private void addEditColumn() {
+    TableColumn<MoneyReceipt, Void> col = new TableColumn<>("EDIT");
+    col.setPrefWidth(110);
 
-    TableColumn<MoneyReceipt, Void> col = new TableColumn<>("Edit");
+    col.setCellFactory(
+        column ->
+            new TableCell<>() {
 
-    TableCell<MoneyReceipt, Void> cell =
-        new TableCell<>() {
+              private final Button btn = new Button("✏ Edit");
 
-          final Button btn = new Button("✏");
+              {
+                btn.getStyleClass().add("btn-gold");
 
-          {
-            btn.setOnAction(
-                e -> {
-                  MoneyReceipt r = getTableView().getItems().get(getIndex());
-                  openEditDialog(r);
-                });
-          }
+                btn.setOnAction(
+                    event -> {
+                      MoneyReceipt receipt = getTableRow().getItem();
 
-          @Override
-          protected void updateItem(Void v, boolean empty) {
-            super.updateItem(v, empty);
-            setGraphic(empty ? null : btn);
-          }
-        };
-    col.setCellFactory(c -> cell);
+                      if (receipt != null) {
+                        openEditDialog(receipt);
+                      }
+                    });
+              }
+
+              @Override
+              protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : btn);
+                setAlignment(Pos.CENTER);
+              }
+            });
 
     tblReport.getColumns().add(col);
   }
 
   // ================= DELETE =================
   private void addDeleteColumn() {
+    TableColumn<MoneyReceipt, Void> col = new TableColumn<>("DELETE");
+    col.setPrefWidth(120);
 
-    TableColumn<MoneyReceipt, Void> col = new TableColumn<>("Delete");
+    col.setCellFactory(
+        column ->
+            new TableCell<>() {
 
-    TableCell<MoneyReceipt, Void> cell =
-        new TableCell<>() {
+              private final Button btn = new Button("🗑 Delete");
 
-          final Button btn = new Button("🗑");
+              {
+                btn.getStyleClass().add("btn-danger");
 
-          {
-            btn.setOnAction(
-                e -> {
-                  MoneyReceipt r = getTableView().getItems().get(getIndex());
+                btn.setOnAction(
+                    event -> {
+                      MoneyReceipt receipt = getTableRow().getItem();
 
-                  if (GlobalUI.confirm("Delete", "Confirm delete?")) {
-                    moneyService.delete(r.getId());
-                    onSearch();
-                  }
-                });
-          }
+                      if (receipt != null && GlobalUI.confirm("Delete", "Confirm delete?")) {
 
-          @Override
-          protected void updateItem(Void v, boolean empty) {
-            super.updateItem(v, empty);
-            setGraphic(empty ? null : btn);
-          }
-        };
-    col.setCellFactory(c -> cell);
+                        moneyService.delete(receipt.getId());
+                        onSearch();
+                      }
+                    });
+              }
+
+              @Override
+              protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : btn);
+                setAlignment(Pos.CENTER);
+              }
+            });
 
     tblReport.getColumns().add(col);
   }
