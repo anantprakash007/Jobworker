@@ -1,10 +1,9 @@
 package com.jobwork.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
@@ -14,56 +13,56 @@ import java.time.LocalDate;
 @Table(name = "product_entry")
 public class ProductEntry {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "job_worker_id", nullable = false)
-    private JobWorker jobWorker;
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "job_worker_id", nullable = false)
+  private JobWorker jobWorker;
 
-    @Column(nullable = false)
-    private String challanNo;
+  @Column(nullable = false)
+  private String challanNo;
 
-    @Column(nullable = false)
-    private LocalDate entryDate;
+  @Column(nullable = false)
+  private LocalDate entryDate;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "product_type_id")
-    private ProductType productType;
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "product_type_id")
+  private ProductType productType;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "product_name_id")
-    private ProductName productName;
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "product_name_id")
+  private ProductName productName;
 
-    private BigDecimal quantity;
+  private BigDecimal quantity;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "unit_id")
-    private Unit unit;
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "unit_id")
+  private Unit unit;
 
-    private BigDecimal weight;
+  private BigDecimal weight;
 
-    // ✅ FIXED NAME (important)
-    private BigDecimal weightPerPiece;
+  // ✅ FIXED NAME (important)
+  private BigDecimal weightPerPiece;
 
-    private BigDecimal totalQuantity;
-    private BigDecimal totalWeight;
+  private BigDecimal totalQuantity;
+  private BigDecimal totalWeight;
 
-    @Enumerated(EnumType.STRING)
-    private EntryStatus status;
+  @Enumerated(EnumType.STRING)
+  private EntryStatus status;
 
+  private String receiptPath;
 
-    private String receiptPath;
-    public BigDecimal getTotalAmount() {
+  public BigDecimal getTotalAmount() {
 
-        if (quantity == null || productName == null) return BigDecimal.ZERO;
+    if (quantity == null || productName == null) return BigDecimal.ZERO;
 
-        BigDecimal rate = productName.getDefaultRate();
-        if (rate == null) return BigDecimal.ZERO;
+    BigDecimal rate = productName.getDefaultRate();
+    if (rate == null) return BigDecimal.ZERO;
 
-        return quantity.multiply(rate);
-    }
+    return quantity.multiply(rate);
+  }
 }
 
 // =====================================================

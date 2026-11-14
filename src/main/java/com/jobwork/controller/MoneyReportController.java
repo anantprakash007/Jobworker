@@ -10,7 +10,11 @@ import com.jobwork.util.ExcelExporter;
 import com.jobwork.util.GlobalUI;
 import com.jobwork.util.JobWorkerComboBoxUtil;
 import com.jobwork.util.PdfExporter;
-
+import java.io.File;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.time.LocalDate;
+import java.util.*;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -18,759 +22,466 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.io.File;
-import java.math.BigDecimal;
-import java.net.URL;
-import java.time.LocalDate;
-import java.util.*;
 
 @Component
 public class MoneyReportController implements Initializable {
 
-    @Autowired
-    private MoneyService moneyService;
+  @Autowired private MoneyService moneyService;
 
-    @Autowired
-    private JobWorkerService workerService;
+  @Autowired private JobWorkerService workerService;
 
-    @Autowired
-    private PdfExporter pdfExporter;
+  @Autowired private PdfExporter pdfExporter;
 
-    @Autowired
-    private ExcelExporter excelExporter;
+  @Autowired private ExcelExporter excelExporter;
 
-    @Autowired
-    private ProductEntryRepository productEntryRepo;
+  @Autowired private ProductEntryRepository productEntryRepo;
 
-    @FXML
-    private ComboBox<JobWorker> cbWorker;
+  @FXML private ComboBox<JobWorker> cbWorker;
 
-    @FXML
-    private DatePicker dpFrom;
+  @FXML private DatePicker dpFrom;
 
-    @FXML
-    private DatePicker dpTo;
+  @FXML private DatePicker dpTo;
 
-    @FXML
-    private TextField tfChallanNo;
+  @FXML private TextField tfChallanNo;
 
-    @FXML
-    private TableView<MoneyReceipt> tblReport;
+  @FXML private TableView<MoneyReceipt> tblReport;
 
-    @FXML
-    private TableColumn<MoneyReceipt, String> colDate;
+  @FXML private TableColumn<MoneyReceipt, String> colDate;
 
-    @FXML
-    private TableColumn<MoneyReceipt, String> colChallan;
+  @FXML private TableColumn<MoneyReceipt, String> colChallan;
 
-    @FXML
-    private TableColumn<MoneyReceipt, String> colWorker;
+  @FXML private TableColumn<MoneyReceipt, String> colWorker;
 
-    @FXML
-    private TableColumn<MoneyReceipt, String> colAmount;
+  @FXML private TableColumn<MoneyReceipt, String> colAmount;
 
-    @FXML
-    private TableColumn<MoneyReceipt, String> colMode;
+  @FXML private TableColumn<MoneyReceipt, String> colMode;
 
-    @FXML
-    private TableColumn<MoneyReceipt, String> colRemark;
+  @FXML private TableColumn<MoneyReceipt, String> colRemark;
 
-    @FXML
-    private Label lblTotalWork;
+  @FXML private Label lblTotalWork;
 
-    @FXML
-    private Label lblTotalPaid;
+  @FXML private Label lblTotalPaid;
 
-    @FXML
-    private Label lblBalance;
+  @FXML private Label lblBalance;
 
+  // ============================================================
+  // INITIALIZE
+  // ============================================================
 
-    // ============================================================
-    // INITIALIZE
-    // ============================================================
+  @Override
+  public void initialize(URL url, ResourceBundle rb) {
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
+    /*
+     * CENTRAL JOB WORKER COMBOBOX
+     *
+     * IMPORTANT:
+     * Do not call cbWorker.setItems(...) again after this.
+     */
+    JobWorkerComboBoxUtil.setup(cbWorker, workerService.findAll());
 
-        /*
-         * CENTRAL JOB WORKER COMBOBOX
-         *
-         * IMPORTANT:
-         * Do not call cbWorker.setItems(...) again after this.
-         */
-        JobWorkerComboBoxUtil.setup(
-                cbWorker,
-                workerService.findAll()
-        );
+    // ========================================================
+    // TABLE COLUMNS
+    // ========================================================
 
+    colDate.setCellValueFactory(
+        c -> new SimpleStringProperty(GlobalUI.formatDate(c.getValue().getReceiptDate())));
 
-        // ========================================================
-        // TABLE COLUMNS
-        // ========================================================
+    colChallan.setCellValueFactory(
+        c ->
+            new SimpleStringProperty(
+                c.getValue().getChallanNo() != null ? c.getValue().getChallanNo() : ""));
 
-        colDate.setCellValueFactory(c ->
-                new SimpleStringProperty(
-                        GlobalUI.formatDate(
-                                c.getValue().getReceiptDate()
-                        )
-                )
-        );
+    colWorker.setCellValueFactory(
+        c ->
+            new SimpleStringProperty(
+                c.getValue().getJobWorker() != null ? c.getValue().getJobWorker().getName() : ""));
 
+    colAmount.setCellValueFactory(
+        c ->
+            new SimpleStringProperty(
+                c.getValue().getAmount() != null
+                    ? "₹ " + c.getValue().getAmount().toPlainString()
+                    : ""));
 
-        colChallan.setCellValueFactory(c ->
-                new SimpleStringProperty(
-                        c.getValue().getChallanNo() != null
-                                ? c.getValue().getChallanNo()
-                                : ""
-                )
-        );
+    colMode.setCellValueFactory(
+        c ->
+            new SimpleStringProperty(
+                c.getValue().getTransferMode() != null
+                    ? c.getValue().getTransferMode().name()
+                    : ""));
 
+    colRemark.setCellValueFactory(
+        c ->
+            new SimpleStringProperty(
+                c.getValue().getRemark() != null ? c.getValue().getRemark() : ""));
 
-        colWorker.setCellValueFactory(c ->
-                new SimpleStringProperty(
-                        c.getValue().getJobWorker() != null
-                                ? c.getValue().getJobWorker().getName()
-                                : ""
-                )
-        );
+    // ========================================================
+    // CANCELLED ROW HIGHLIGHT
+    // ========================================================
 
+    tblReport.setRowFactory(
+        tv ->
+            new TableRow<>() {
 
-        colAmount.setCellValueFactory(c ->
-                new SimpleStringProperty(
-                        c.getValue().getAmount() != null
-                                ? "₹ "
-                                + c.getValue().getAmount().toPlainString()
-                                : ""
-                )
-        );
+              @Override
+              protected void updateItem(MoneyReceipt item, boolean empty) {
 
+                super.updateItem(item, empty);
 
-        colMode.setCellValueFactory(c ->
-                new SimpleStringProperty(
-                        c.getValue().getTransferMode() != null
-                                ? c.getValue().getTransferMode().name()
-                                : ""
-                )
-        );
+                if (item == null || empty) {
 
+                  setStyle("");
 
-        colRemark.setCellValueFactory(c ->
-                new SimpleStringProperty(
-                        c.getValue().getRemark() != null
-                                ? c.getValue().getRemark()
-                                : ""
-                )
-        );
+                } else if (item.getStatus() == EntryStatus.CANCELLED) {
 
+                  setStyle("-fx-background-color:#f3f4f6;" + " -fx-text-fill:gray;");
 
-        // ========================================================
-        // CANCELLED ROW HIGHLIGHT
-        // ========================================================
+                } else {
 
-        tblReport.setRowFactory(tv ->
-                new TableRow<>() {
-
-                    @Override
-                    protected void updateItem(
-                            MoneyReceipt item,
-                            boolean empty) {
-
-                        super.updateItem(item, empty);
-
-                        if (item == null || empty) {
-
-                            setStyle("");
-
-                        } else if (
-                                item.getStatus()
-                                        == EntryStatus.CANCELLED) {
-
-                            setStyle(
-                                    "-fx-background-color:#f3f4f6;"
-                                            + " -fx-text-fill:gray;"
-                            );
-
-                        } else {
-
-                            setStyle("");
-                        }
-                    }
+                  setStyle("");
                 }
-        );
+              }
+            });
 
+    // ========================================================
+    // ACTION COLUMNS
+    // ========================================================
 
-        // ========================================================
-        // ACTION COLUMNS
-        // ========================================================
+    addEditColumn();
+    addDeleteColumn();
+    addRestoreColumn();
+  }
 
-        addEditColumn();
-        addDeleteColumn();
-        addRestoreColumn();
+  // ============================================================
+  // SEARCH
+  // ============================================================
+
+  @FXML
+  public void onSearch() {
+
+    /*
+     * IMPORTANT:
+     *
+     * cbWorker.getValue() is JobWorker.
+     * We take only its database ID for the service query.
+     */
+    Long workerId = cbWorker.getValue() != null ? cbWorker.getValue().getId() : null;
+
+    LocalDate from = dpFrom.getValue();
+
+    LocalDate to = dpTo.getValue();
+
+    String challan = tfChallanNo.getText() != null ? tfChallanNo.getText().trim() : null;
+
+    if (challan != null && challan.isEmpty()) {
+      challan = null;
     }
 
+    // ========================================================
+    // LOAD MONEY RECEIPTS
+    // ========================================================
 
-    // ============================================================
-    // SEARCH
-    // ============================================================
+    List<MoneyReceipt> results = moneyService.searchReport(workerId, from, to, challan);
 
-    @FXML
-    public void onSearch() {
+    // ========================================================
+    // SORT BY DATE
+    // ========================================================
 
-        /*
-         * IMPORTANT:
-         *
-         * cbWorker.getValue() is JobWorker.
-         * We take only its database ID for the service query.
-         */
-        Long workerId =
-                cbWorker.getValue() != null
-                        ? cbWorker.getValue().getId()
-                        : null;
+    results.sort(
+        Comparator.comparing(
+            MoneyReceipt::getReceiptDate, Comparator.nullsLast(Comparator.naturalOrder())));
 
+    tblReport.setItems(FXCollections.observableArrayList(results));
 
-        LocalDate from =
-                dpFrom.getValue();
+    // ========================================================
+    // TOTAL PAID
+    // ========================================================
 
-        LocalDate to =
-                dpTo.getValue();
+    BigDecimal totalPaid =
+        results.stream()
+            .filter(r -> r.getStatus() != EntryStatus.CANCELLED)
+            .map(r -> r.getAmount() != null ? r.getAmount() : BigDecimal.ZERO)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+    // ========================================================
+    // TOTAL WORK
+    // ========================================================
 
-        String challan =
-                tfChallanNo.getText() != null
-                        ? tfChallanNo.getText().trim()
-                        : null;
+    BigDecimal totalWork = productEntryRepo.sumTotal(workerId, from, to);
 
-
-        if (challan != null && challan.isEmpty()) {
-            challan = null;
-        }
-
-
-        // ========================================================
-        // LOAD MONEY RECEIPTS
-        // ========================================================
-
-        List<MoneyReceipt> results =
-                moneyService.searchReport(
-                        workerId,
-                        from,
-                        to,
-                        challan
-                );
-
-
-        // ========================================================
-        // SORT BY DATE
-        // ========================================================
-
-        results.sort(
-                Comparator.comparing(
-                        MoneyReceipt::getReceiptDate,
-                        Comparator.nullsLast(
-                                Comparator.naturalOrder()
-                        )
-                )
-        );
-
-
-        tblReport.setItems(
-                FXCollections.observableArrayList(results)
-        );
-
-
-        // ========================================================
-        // TOTAL PAID
-        // ========================================================
-
-        BigDecimal totalPaid =
-                results.stream()
-
-                        .filter(r ->
-                                r.getStatus()
-                                        != EntryStatus.CANCELLED
-                        )
-
-                        .map(r ->
-                                r.getAmount() != null
-                                        ? r.getAmount()
-                                        : BigDecimal.ZERO
-                        )
-
-                        .reduce(
-                                BigDecimal.ZERO,
-                                BigDecimal::add
-                        );
-
-
-        // ========================================================
-        // TOTAL WORK
-        // ========================================================
-
-        BigDecimal totalWork =
-                productEntryRepo.sumTotal(
-                        workerId,
-                        from,
-                        to
-                );
-
-
-        if (totalWork == null) {
-            totalWork = BigDecimal.ZERO;
-        }
-
-
-        // ========================================================
-        // BALANCE
-        // ========================================================
-
-        BigDecimal balance =
-                totalWork.subtract(totalPaid);
-
-
-        // ========================================================
-        // UPDATE UI
-        // ========================================================
-
-        lblTotalWork.setText(
-                "₹ " + totalWork.toPlainString()
-        );
-
-        lblTotalPaid.setText(
-                "₹ " + totalPaid.toPlainString()
-        );
-
-        lblBalance.setText(
-                "₹ " + balance.toPlainString()
-        );
+    if (totalWork == null) {
+      totalWork = BigDecimal.ZERO;
     }
 
+    // ========================================================
+    // BALANCE
+    // ========================================================
 
-    // ============================================================
-    // EDIT COLUMN
-    // ============================================================
+    BigDecimal balance = totalWork.subtract(totalPaid);
 
-    private void addEditColumn() {
+    // ========================================================
+    // UPDATE UI
+    // ========================================================
 
-        TableColumn<MoneyReceipt, Void> col =
-                new TableColumn<>("Edit");
+    lblTotalWork.setText("₹ " + totalWork.toPlainString());
 
+    lblTotalPaid.setText("₹ " + totalPaid.toPlainString());
 
-        TableCell<MoneyReceipt, Void> cell =
-                new TableCell<>() {
+    lblBalance.setText("₹ " + balance.toPlainString());
+  }
 
-                    final Button btn =
-                            new Button("✏");
+  // ============================================================
+  // EDIT COLUMN
+  // ============================================================
 
+  private void addEditColumn() {
 
-                    {
-                        btn.setOnAction(e -> {
+    TableColumn<MoneyReceipt, Void> col = new TableColumn<>("Edit");
 
-                            MoneyReceipt r =
-                                    getTableView()
-                                            .getItems()
-                                            .get(getIndex());
+    TableCell<MoneyReceipt, Void> cell =
+        new TableCell<>() {
 
-                            openEditDialog(r);
-                        });
-                    }
+          final Button btn = new Button("✏");
 
+          {
+            btn.setOnAction(
+                e -> {
+                  MoneyReceipt r = getTableView().getItems().get(getIndex());
 
-                    @Override
-                    protected void updateItem(
-                            Void v,
-                            boolean empty) {
+                  openEditDialog(r);
+                });
+          }
 
-                        super.updateItem(v, empty);
+          @Override
+          protected void updateItem(Void v, boolean empty) {
 
-                        setGraphic(
-                                empty
-                                        ? null
-                                        : btn
-                        );
-                    }
-                };
+            super.updateItem(v, empty);
 
+            setGraphic(empty ? null : btn);
+          }
+        };
 
-        col.setCellFactory(c -> cell);
+    col.setCellFactory(c -> cell);
 
-        tblReport.getColumns().add(col);
-    }
+    tblReport.getColumns().add(col);
+  }
 
+  // ============================================================
+  // DELETE COLUMN
+  // ============================================================
 
-    // ============================================================
-    // DELETE COLUMN
-    // ============================================================
+  private void addDeleteColumn() {
 
-    private void addDeleteColumn() {
+    TableColumn<MoneyReceipt, Void> col = new TableColumn<>("Delete");
 
-        TableColumn<MoneyReceipt, Void> col =
-                new TableColumn<>("Delete");
+    TableCell<MoneyReceipt, Void> cell =
+        new TableCell<>() {
 
+          final Button btn = new Button("🗑");
 
-        TableCell<MoneyReceipt, Void> cell =
-                new TableCell<>() {
+          {
+            btn.setOnAction(
+                e -> {
+                  MoneyReceipt r = getTableView().getItems().get(getIndex());
 
-                    final Button btn =
-                            new Button("🗑");
+                  if (GlobalUI.confirm("Delete", "Confirm delete?")) {
 
-
-                    {
-                        btn.setOnAction(e -> {
-
-                            MoneyReceipt r =
-                                    getTableView()
-                                            .getItems()
-                                            .get(getIndex());
-
-
-                            if (GlobalUI.confirm(
-                                    "Delete",
-                                    "Confirm delete?"
-                            )) {
-
-                                moneyService.delete(
-                                        r.getId()
-                                );
-
-                                onSearch();
-                            }
-                        });
-                    }
-
-
-                    @Override
-                    protected void updateItem(
-                            Void v,
-                            boolean empty) {
-
-                        super.updateItem(v, empty);
-
-                        setGraphic(
-                                empty
-                                        ? null
-                                        : btn
-                        );
-                    }
-                };
-
-
-        col.setCellFactory(c -> cell);
-
-        tblReport.getColumns().add(col);
-    }
-
-
-    // ============================================================
-    // RESTORE COLUMN
-    // ============================================================
-
-    private void addRestoreColumn() {
-
-        TableColumn<MoneyReceipt, Void> col =
-                new TableColumn<>("Restore");
-
-
-        col.setCellFactory(c ->
-                new TableCell<>() {
-
-                    final Button btn =
-                            new Button("♻");
-
-
-                    {
-                        btn.setOnAction(e -> {
-
-                            MoneyReceipt r =
-                                    getTableView()
-                                            .getItems()
-                                            .get(getIndex());
-
-
-                            moneyService.restorePayment(
-                                    r.getId()
-                            );
-
-
-                            GlobalUI.success(
-                                    "Restored"
-                            );
-
-
-                            onSearch();
-                        });
-                    }
-
-
-                    @Override
-                    protected void updateItem(
-                            Void v,
-                            boolean empty) {
-
-                        super.updateItem(v, empty);
-
-
-                        if (empty) {
-
-                            setGraphic(null);
-
-                            return;
-                        }
-
-
-                        MoneyReceipt r =
-                                getTableView()
-                                        .getItems()
-                                        .get(getIndex());
-
-
-                        setGraphic(
-                                r.getStatus()
-                                        == EntryStatus.CANCELLED
-                                        ? btn
-                                        : null
-                        );
-                    }
-                }
-        );
-
-
-        tblReport.getColumns().add(col);
-    }
-
-
-    // ============================================================
-    // EDIT DIALOG
-    // ============================================================
-
-    private void openEditDialog(
-            MoneyReceipt r) {
-
-        Dialog<MoneyReceipt> dialog =
-                new Dialog<>();
-
-
-        dialog.setTitle(
-                "Edit Receipt"
-        );
-
-
-        ButtonType saveBtn =
-                new ButtonType(
-                        "Save",
-                        ButtonBar.ButtonData.OK_DONE
-                );
-
-
-        dialog.getDialogPane()
-                .getButtonTypes()
-                .addAll(
-                        saveBtn,
-                        ButtonType.CANCEL
-                );
-
-
-        TextField tfAmt =
-                new TextField(
-                        r.getAmount() != null
-                                ? r.getAmount().toPlainString()
-                                : ""
-                );
-
-
-        TextField tfRemark =
-                new TextField(
-                        r.getRemark() != null
-                                ? r.getRemark()
-                                : ""
-                );
-
-
-        dialog.getDialogPane().setContent(
-                new VBox(
-                        10,
-                        new Label("Amount"),
-                        tfAmt,
-                        new Label("Remark"),
-                        tfRemark
-                )
-        );
-
-
-        dialog.setResultConverter(btn -> {
-
-            if (btn == saveBtn) {
-
-                try {
-
-                    r.setAmount(
-                            new BigDecimal(
-                                    tfAmt.getText().trim()
-                            )
-                    );
-
-                } catch (Exception e) {
-
-                    GlobalUI.warn(
-                            "Invalid amount"
-                    );
-
-                    return null;
-                }
-
-
-                r.setRemark(
-                        tfRemark.getText()
-                );
-
-
-                return r;
-            }
-
-
-            return null;
-        });
-
-
-        dialog.showAndWait()
-                .ifPresent(updated -> {
-
-                    moneyService.save(
-                            updated
-                    );
+                    moneyService.delete(r.getId());
 
                     onSearch();
+                  }
                 });
-    }
+          }
 
+          @Override
+          protected void updateItem(Void v, boolean empty) {
 
-    // ============================================================
-    // PDF
-    // ============================================================
+            super.updateItem(v, empty);
 
-    @FXML
-    public void onPdf() {
+            setGraphic(empty ? null : btn);
+          }
+        };
 
-        try {
+    col.setCellFactory(c -> cell);
 
-            FileChooser fc =
-                    new FileChooser();
+    tblReport.getColumns().add(col);
+  }
 
+  // ============================================================
+  // RESTORE COLUMN
+  // ============================================================
 
-            fc.setTitle(
-                    "Save PDF File"
-            );
+  private void addRestoreColumn() {
 
+    TableColumn<MoneyReceipt, Void> col = new TableColumn<>("Restore");
 
-            fc.getExtensionFilters().add(
-                    new FileChooser.ExtensionFilter(
-                            "PDF Files (*.pdf)",
-                            "*.pdf"
-                    )
-            );
+    col.setCellFactory(
+        c ->
+            new TableCell<>() {
 
+              final Button btn = new Button("♻");
 
-            File file =
-                    fc.showSaveDialog(null);
+              {
+                btn.setOnAction(
+                    e -> {
+                      MoneyReceipt r = getTableView().getItems().get(getIndex());
 
+                      moneyService.restorePayment(r.getId());
 
-            if (file == null) {
-                return;
+                      GlobalUI.success("Restored");
+
+                      onSearch();
+                    });
+              }
+
+              @Override
+              protected void updateItem(Void v, boolean empty) {
+
+                super.updateItem(v, empty);
+
+                if (empty) {
+
+                  setGraphic(null);
+
+                  return;
+                }
+
+                MoneyReceipt r = getTableView().getItems().get(getIndex());
+
+                setGraphic(r.getStatus() == EntryStatus.CANCELLED ? btn : null);
+              }
+            });
+
+    tblReport.getColumns().add(col);
+  }
+
+  // ============================================================
+  // EDIT DIALOG
+  // ============================================================
+
+  private void openEditDialog(MoneyReceipt r) {
+
+    Dialog<MoneyReceipt> dialog = new Dialog<>();
+
+    dialog.setTitle("Edit Receipt");
+
+    ButtonType saveBtn = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+
+    dialog.getDialogPane().getButtonTypes().addAll(saveBtn, ButtonType.CANCEL);
+
+    TextField tfAmt = new TextField(r.getAmount() != null ? r.getAmount().toPlainString() : "");
+
+    TextField tfRemark = new TextField(r.getRemark() != null ? r.getRemark() : "");
+
+    dialog
+        .getDialogPane()
+        .setContent(new VBox(10, new Label("Amount"), tfAmt, new Label("Remark"), tfRemark));
+
+    dialog.setResultConverter(
+        btn -> {
+          if (btn == saveBtn) {
+
+            try {
+
+              r.setAmount(new BigDecimal(tfAmt.getText().trim()));
+
+            } catch (Exception e) {
+
+              GlobalUI.warn("Invalid amount");
+
+              return null;
             }
 
+            r.setRemark(tfRemark.getText());
 
-            pdfExporter.exportMoneyReport(
-                    tblReport.getItems(),
+            return r;
+          }
 
-                    cbWorker.getValue() != null
-                            ? cbWorker.getValue().getName()
-                            : "All",
+          return null;
+        });
 
-                    dpFrom.getValue(),
-                    dpTo.getValue(),
+    dialog
+        .showAndWait()
+        .ifPresent(
+            updated -> {
+              moneyService.save(updated);
 
-                    file.toPath()
-            );
+              onSearch();
+            });
+  }
 
+  // ============================================================
+  // PDF
+  // ============================================================
 
-            GlobalUI.success(
-                    "PDF exported successfully!"
-            );
+  @FXML
+  public void onPdf() {
 
+    try {
 
-        } catch (Exception e) {
+      FileChooser fc = new FileChooser();
 
-            GlobalUI.warn(
-                    "PDF export failed: "
-                            + e.getMessage()
-            );
-        }
+      fc.setTitle("Save PDF File");
+
+      fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files (*.pdf)", "*.pdf"));
+
+      File file = fc.showSaveDialog(null);
+
+      if (file == null) {
+        return;
+      }
+
+      pdfExporter.exportMoneyReport(
+          tblReport.getItems(),
+          cbWorker.getValue() != null ? cbWorker.getValue().getName() : "All",
+          dpFrom.getValue(),
+          dpTo.getValue(),
+          file.toPath());
+
+      GlobalUI.success("PDF exported successfully!");
+
+    } catch (Exception e) {
+
+      GlobalUI.warn("PDF export failed: " + e.getMessage());
     }
+  }
 
+  // ============================================================
+  // EXCEL
+  // ============================================================
 
-    // ============================================================
-    // EXCEL
-    // ============================================================
+  @FXML
+  public void onExcel() {
 
-    @FXML
-    public void onExcel() {
+    try {
 
-        try {
+      FileChooser fc = new FileChooser();
 
-            FileChooser fc =
-                    new FileChooser();
+      fc.setTitle("Save Excel File");
 
+      fc.getExtensionFilters()
+          .add(new FileChooser.ExtensionFilter("Excel Files (*.xlsx)", "*.xlsx"));
 
-            fc.setTitle(
-                    "Save Excel File"
-            );
+      File file = fc.showSaveDialog(null);
 
+      if (file == null) {
+        return;
+      }
 
-            fc.getExtensionFilters().add(
-                    new FileChooser.ExtensionFilter(
-                            "Excel Files (*.xlsx)",
-                            "*.xlsx"
-                    )
-            );
+      excelExporter.exportMoneyReport(
+          tblReport.getItems(),
+          cbWorker.getValue() != null ? cbWorker.getValue().getName() : "All",
+          dpFrom.getValue(),
+          dpTo.getValue(),
+          file.toPath());
 
+      GlobalUI.success("Excel exported successfully!");
 
-            File file =
-                    fc.showSaveDialog(null);
+    } catch (Exception e) {
 
-
-            if (file == null) {
-                return;
-            }
-
-
-            excelExporter.exportMoneyReport(
-                    tblReport.getItems(),
-
-                    cbWorker.getValue() != null
-                            ? cbWorker.getValue().getName()
-                            : "All",
-
-                    dpFrom.getValue(),
-                    dpTo.getValue(),
-
-                    file.toPath()
-            );
-
-
-            GlobalUI.success(
-                    "Excel exported successfully!"
-            );
-
-
-        } catch (Exception e) {
-
-            GlobalUI.warn(
-                    "Excel export failed: "
-                            + e.getMessage()
-            );
-        }
+      GlobalUI.warn("Excel export failed: " + e.getMessage());
     }
+  }
 }

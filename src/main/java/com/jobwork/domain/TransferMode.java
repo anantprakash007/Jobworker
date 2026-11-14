@@ -1,5 +1,8 @@
 package com.jobwork.domain;
 
 public enum TransferMode {
-    CASH, NEFT, UPI, CHEQUE
+  CASH,
+  NEFT,
+  UPI,
+  CHEQUE
 }

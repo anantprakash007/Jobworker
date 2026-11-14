@@ -1,10 +1,9 @@
 package com.jobwork.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
@@ -14,20 +13,19 @@ import java.time.LocalDate;
 @Table(name = "opening_adjustment")
 public class OpeningAdjustment {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne
-    private JobWorker worker;
+  @ManyToOne private JobWorker worker;
 
-    private LocalDate date;
+  private LocalDate date;
 
-    private BigDecimal amount;
+  private BigDecimal amount;
 
-    // DR = increase balance, CR = decrease
-    @Enumerated(EnumType.STRING)
-    private EntryType entryType;
+  // DR = increase balance, CR = decrease
+  @Enumerated(EnumType.STRING)
+  private EntryType entryType;
 
-    private String remark;
+  private String remark;
 }

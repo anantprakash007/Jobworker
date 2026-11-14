@@ -6,13 +6,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpringContext {
 
-    private static ApplicationContext context;
+  private static ApplicationContext context;
 
-    public SpringContext(ApplicationContext context) {
-        SpringContext.context = context;
-    }
+  public SpringContext(ApplicationContext context) {
+    SpringContext.context = context;
+  }
 
-    public static ApplicationContext getApplicationContext() {
-        return context;
-    }
+  public static ApplicationContext getApplicationContext() {
+    return context;
+  }
 }
