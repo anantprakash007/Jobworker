@@ -48,8 +48,6 @@ public class MoneyReportController implements Initializable {
   @FXML private TableColumn<MoneyReceipt, String> colAmount;
   @FXML private TableColumn<MoneyReceipt, String> colMode;
   @FXML private TableColumn<MoneyReceipt, String> colRemark;
-  //    @FXML private TableColumn<MoneyReceipt, Void> colEdit;
-  //    @FXML private TableColumn<MoneyReceipt, Void> colDelete;
 
   @FXML private Label lblTotalWork;
   @FXML private Label lblTotalPaid;
