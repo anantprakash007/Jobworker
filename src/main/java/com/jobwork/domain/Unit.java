@@ -14,13 +14,15 @@ import lombok.NoArgsConstructor;
 @Table(name = "unit")
 public class Unit {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @Column(nullable = false, unique = true, length = 50)
-    private String name;
+  @Column(nullable = false, unique = true, length = 50)
+  private String name;
 
-    @Override
-    public String toString() { return name; }
+  @Override
+  public String toString() {
+    return name;
+  }
 }

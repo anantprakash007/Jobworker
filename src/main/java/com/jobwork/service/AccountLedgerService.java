@@ -2,222 +2,204 @@ package com.jobwork.service;
 
 import com.jobwork.domain.*;
 import com.jobwork.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class AccountLedgerService {
 
-    @Autowired private ProductEntryRepository productRepo;
-    @Autowired private MoneyReceiptRepository moneyRepo;
-    @Autowired private JobWorkerRepository workerRepo;
-    @Autowired private OpeningAdjustmentRepository adjRepo;
+  @Autowired private ProductEntryRepository productRepo;
+  @Autowired private MoneyReceiptRepository moneyRepo;
+  @Autowired private JobWorkerRepository workerRepo;
+  @Autowired private OpeningAdjustmentRepository adjRepo;
+
+  // =========================================================
+  // 🔥 MAIN LEDGER
+  // =========================================================
+  public List<WorkerAccountLedgerRow> getLedger(Long workerId, LocalDate from, LocalDate to) {
+
+    List<ProductEntry> workList = productRepo.findByWorkerAndDateRange(workerId, from, to);
+
+    List<MoneyReceipt> payList = moneyRepo.findByJobWorkerId(workerId);
+
+    List<WorkerAccountLedgerRow> ledger = new ArrayList<>();
 
     // =========================================================
-    // 🔥 MAIN LEDGER
+    // 🔥 1. OPENING BALANCE (FINAL CORRECT)
     // =========================================================
-    public List<WorkerAccountLedgerRow> getLedger(
-            Long workerId,
-            LocalDate from,
-            LocalDate to
-    ) {
 
-        List<ProductEntry> workList =
-                productRepo.findByWorkerAndDateRange(workerId, from, to);
+    // 🔥 GET MANUAL OPENING
+    JobWorker worker = workerRepo.findById(workerId).orElse(null);
 
-        List<MoneyReceipt> payList =
-                moneyRepo.findByJobWorkerId(workerId);
+    BigDecimal manualOpening =
+        (worker != null && worker.getOpeningBalance() != null)
+            ? worker.getOpeningBalance()
+            : BigDecimal.ZERO;
 
-        List<WorkerAccountLedgerRow> ledger = new ArrayList<>();
+    // 🔥 BASE OPENING
+    BigDecimal opening = manualOpening;
 
-        // =========================================================
-        // 🔥 1. OPENING BALANCE (FINAL CORRECT)
-        // =========================================================
+    // 🔥 ADD PREVIOUS TRANSACTIONS ONLY IF DATE FILTER EXISTS
+    if (from != null) {
 
-        // 🔥 GET MANUAL OPENING
-        JobWorker worker = workerRepo.findById(workerId).orElse(null);
+      BigDecimal workBefore = productRepo.sumTotal(workerId, null, from);
 
-        BigDecimal manualOpening =
-                (worker != null && worker.getOpeningBalance() != null)
-                        ? worker.getOpeningBalance()
-                        : BigDecimal.ZERO;
+      BigDecimal paidBefore = moneyRepo.findOpeningBalance(workerId, from);
 
-        // 🔥 BASE OPENING
-        BigDecimal opening = manualOpening;
+      if (workBefore != null) opening = opening.add(workBefore);
 
-        // 🔥 ADD PREVIOUS TRANSACTIONS ONLY IF DATE FILTER EXISTS
-        if (from != null) {
+      if (paidBefore != null) opening = opening.add(paidBefore);
+    }
 
-            BigDecimal workBefore =
-                    productRepo.sumTotal(workerId, null, from);
+    // 🔥 OPENING ROW
+    WorkerAccountLedgerRow open = new WorkerAccountLedgerRow();
+    open.setDate(from != null ? from.minusDays(1) : null);
+    open.setParticular("Opening Balance");
+    open.setDebit(BigDecimal.ZERO);
+    open.setCredit(BigDecimal.ZERO);
+    open.setBalance(opening);
 
-            BigDecimal paidBefore =
-                    moneyRepo.findOpeningBalance(workerId, from);
+    ledger.add(open);
 
-            if (workBefore != null)
-                opening = opening.add(workBefore);
+    // =========================================================
+    // 🔥 2. GROUP WORK (DEBIT)
+    // =========================================================
+    Map<String, BigDecimal> grouped = new LinkedHashMap<>();
 
-            if (paidBefore != null)
-                opening = opening.add(paidBefore);
-        }
+    for (ProductEntry p : workList) {
+      grouped.merge(p.getChallanNo(), p.getTotalAmount(), BigDecimal::add);
+    }
 
-        // 🔥 OPENING ROW
-        WorkerAccountLedgerRow open = new WorkerAccountLedgerRow();
-        open.setDate(from != null ? from.minusDays(1) : null);
-        open.setParticular("Opening Balance");
-        open.setDebit(BigDecimal.ZERO);
-        open.setCredit(BigDecimal.ZERO);
-        open.setBalance(opening);
+    for (Map.Entry<String, BigDecimal> e : grouped.entrySet()) {
 
-        ledger.add(open);
+      WorkerAccountLedgerRow row = new WorkerAccountLedgerRow();
 
-        // =========================================================
-        // 🔥 2. GROUP WORK (DEBIT)
-        // =========================================================
-        Map<String, BigDecimal> grouped = new LinkedHashMap<>();
+      row.setDate(
+          workList.stream()
+              .filter(p -> p.getChallanNo().equals(e.getKey()))
+              .map(ProductEntry::getEntryDate)
+              .min(LocalDate::compareTo)
+              .orElse(null));
 
-        for (ProductEntry p : workList) {
-            grouped.merge(
-                    p.getChallanNo(),
-                    p.getTotalAmount(),
-                    BigDecimal::add
-            );
-        }
+      row.setParticular("Challan #" + e.getKey());
+      row.setDebit(e.getValue());
+      row.setCredit(BigDecimal.ZERO);
+      row.setChallanNo(e.getKey());
 
-        for (Map.Entry<String, BigDecimal> e : grouped.entrySet()) {
+      ledger.add(row);
+    }
 
-            WorkerAccountLedgerRow row = new WorkerAccountLedgerRow();
+    // =========================================================
+    // 🔥 3. PAYMENTS (CREDIT)
+    // =========================================================
+    for (MoneyReceipt m : payList) {
 
-            row.setDate(
-                    workList.stream()
-                            .filter(p -> p.getChallanNo().equals(e.getKey()))
-                            .map(ProductEntry::getEntryDate)
-                            .min(LocalDate::compareTo)
-                            .orElse(null)
-            );
+      if (m.getStatus() != null && m.getStatus().name().equalsIgnoreCase("CANCELLED")) continue;
 
-            row.setParticular("Challan #" + e.getKey());
-            row.setDebit(e.getValue());
-            row.setCredit(BigDecimal.ZERO);
-            row.setChallanNo(e.getKey());
+      WorkerAccountLedgerRow row = new WorkerAccountLedgerRow();
 
-            ledger.add(row);
-        }
+      row.setDate(m.getReceiptDate());
 
-        // =========================================================
-        // 🔥 3. PAYMENTS (CREDIT)
-        // =========================================================
-        for (MoneyReceipt m : payList) {
+      if (m.getEntryType() == EntryType.ADVANCE) {
+        row.setParticular("Advance");
+      } else {
+        row.setParticular("Payment");
+      }
 
-            if (m.getStatus() != null &&
-                    m.getStatus().name().equalsIgnoreCase("CANCELLED"))
-                continue;
+      row.setDebit(BigDecimal.ZERO);
+      row.setCredit(m.getAmount());
 
-            WorkerAccountLedgerRow row = new WorkerAccountLedgerRow();
+      ledger.add(row);
+    }
 
-            row.setDate(m.getReceiptDate());
+    // =========================================================
+    // 🔥 4. OPENING ADJUSTMENTS
+    // =========================================================
+    List<OpeningAdjustment> adjList = adjRepo.findByWorkerIdAndDateBetween(workerId, from, to);
 
-            if (m.getEntryType() == EntryType.ADVANCE) {
-                row.setParticular("Advance");
-            } else {
-                row.setParticular("Payment");
-            }
+    for (OpeningAdjustment a : adjList) {
 
-            row.setDebit(BigDecimal.ZERO);
-            row.setCredit(m.getAmount());
+      WorkerAccountLedgerRow row = new WorkerAccountLedgerRow();
 
-            ledger.add(row);
-        }
+      row.setDate(a.getDate());
+      row.setParticular("Adjustment: " + (a.getRemark() != null ? a.getRemark() : ""));
 
-        // =========================================================
-        // 🔥 4. OPENING ADJUSTMENTS
-        // =========================================================
-        List<OpeningAdjustment> adjList =
-                adjRepo.findByWorkerIdAndDateBetween(workerId, from, to);
+      if (a.getEntryType() == EntryType.ADVANCE) {
+        row.setDebit(a.getAmount()); // increase balance
+        row.setCredit(BigDecimal.ZERO);
+      } else {
+        row.setDebit(BigDecimal.ZERO);
+        row.setCredit(a.getAmount()); // decrease balance
+      }
 
-        for (OpeningAdjustment a : adjList) {
+      ledger.add(row);
+    }
 
-            WorkerAccountLedgerRow row = new WorkerAccountLedgerRow();
-
-            row.setDate(a.getDate());
-            row.setParticular("Adjustment: " +
-                    (a.getRemark() != null ? a.getRemark() : ""));
-
-            if (a.getEntryType() == EntryType.ADVANCE) {
-                row.setDebit(a.getAmount());   // increase balance
-                row.setCredit(BigDecimal.ZERO);
-            } else {
-                row.setDebit(BigDecimal.ZERO);
-                row.setCredit(a.getAmount());  // decrease balance
-            }
-
-            ledger.add(row);
-        }
-
-        // =========================================================
-        // 🔥 5. SORT BY DATE
-        // =========================================================
-        ledger.sort((a, b) -> {
-            if (a.getDate() == null) return -1;
-            if (b.getDate() == null) return 1;
-            return a.getDate().compareTo(b.getDate());
+    // =========================================================
+    // 🔥 5. SORT BY DATE
+    // =========================================================
+    ledger.sort(
+        (a, b) -> {
+          if (a.getDate() == null) return -1;
+          if (b.getDate() == null) return 1;
+          return a.getDate().compareTo(b.getDate());
         });
 
-        // =========================================================
-        // 🔥 6. RUNNING BALANCE
-        // =========================================================
-        BigDecimal balance = opening;
+    // =========================================================
+    // 🔥 6. RUNNING BALANCE
+    // =========================================================
+    BigDecimal balance = opening;
 
-        for (WorkerAccountLedgerRow r : ledger) {
+    for (WorkerAccountLedgerRow r : ledger) {
 
-            if ("Opening Balance".equals(r.getParticular())) {
-                r.setBalance(opening);
-                continue;
-            }
+      if ("Opening Balance".equals(r.getParticular())) {
+        r.setBalance(opening);
+        continue;
+      }
 
-            BigDecimal debit = r.getDebit() == null ? BigDecimal.ZERO : r.getDebit();
-            BigDecimal credit = r.getCredit() == null ? BigDecimal.ZERO : r.getCredit();
+      BigDecimal debit = r.getDebit() == null ? BigDecimal.ZERO : r.getDebit();
+      BigDecimal credit = r.getCredit() == null ? BigDecimal.ZERO : r.getCredit();
 
-            balance = balance.add(debit).subtract(credit);
+      balance = balance.add(debit).subtract(credit);
 
-            r.setBalance(balance);
-        }
-
-        // =========================================================
-        // 🔥 7. CLOSING BALANCE
-        // =========================================================
-        WorkerAccountLedgerRow closing = new WorkerAccountLedgerRow();
-        closing.setDate(to);
-        closing.setParticular("Closing Balance");
-        closing.setDebit(BigDecimal.ZERO);
-        closing.setCredit(BigDecimal.ZERO);
-        closing.setBalance(balance);
-
-        ledger.add(closing);
-
-        return ledger;
+      r.setBalance(balance);
     }
 
     // =========================================================
-    // 🔥 OPENING BALANCE API
+    // 🔥 7. CLOSING BALANCE
     // =========================================================
-    public BigDecimal getOpeningBalance(Long workerId, LocalDate fromDate) {
+    WorkerAccountLedgerRow closing = new WorkerAccountLedgerRow();
+    closing.setDate(to);
+    closing.setParticular("Closing Balance");
+    closing.setDebit(BigDecimal.ZERO);
+    closing.setCredit(BigDecimal.ZERO);
+    closing.setBalance(balance);
 
-        List<WorkerAccountLedgerRow> list =
-                getLedger(workerId, null, fromDate.minusDays(1));
+    ledger.add(closing);
 
-        BigDecimal debit = list.stream()
-                .map(r -> r.getDebit() == null ? BigDecimal.ZERO : r.getDebit())
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    return ledger;
+  }
 
-        BigDecimal credit = list.stream()
-                .map(r -> r.getCredit() == null ? BigDecimal.ZERO : r.getCredit())
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+  // =========================================================
+  // 🔥 OPENING BALANCE API
+  // =========================================================
+  public BigDecimal getOpeningBalance(Long workerId, LocalDate fromDate) {
 
-        return debit.subtract(credit);
-    }
+    List<WorkerAccountLedgerRow> list = getLedger(workerId, null, fromDate.minusDays(1));
+
+    BigDecimal debit =
+        list.stream()
+            .map(r -> r.getDebit() == null ? BigDecimal.ZERO : r.getDebit())
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+    BigDecimal credit =
+        list.stream()
+            .map(r -> r.getCredit() == null ? BigDecimal.ZERO : r.getCredit())
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+    return debit.subtract(credit);
+  }
 }
