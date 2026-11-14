@@ -5,6 +5,7 @@ import com.jobwork.domain.*;
 import com.jobwork.service.JobWorkerService;
 import com.jobwork.service.MoneyService;
 import com.jobwork.util.*;
+import com.jobwork.util.JobWorkerComboBoxUtil;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -86,10 +87,11 @@ public class MoneyReceiptController implements Initializable {
      * cbJobWorker.setCellFactory(cb -> new ListCell<>() { @Override protected void
      * updateItem(JobWorker item, boolean empty) { super.updateItem(item, empty); setText(empty ||
      * item == null ? "" : item.getId() + " - " + item.getName()); } });
-     * cbJobWorker.setButtonCell(cbJobWorker.getCellFactory().call(null));
-     * cbJobWorker.setItems(FXCollections.observableArrayList(workerService.findAll()));
      */
     JobWorkerComboBoxUtil.setup(cbJobWorker, workerService.findAll());
+    cbJobWorker.setButtonCell(cbJobWorker.getCellFactory().call(null));
+    cbJobWorker.setItems(FXCollections.observableArrayList(workerService.findAll()));
+
     cbEntryType.setItems(FXCollections.observableArrayList(EntryType.values()));
     cbTransferMode.setItems(FXCollections.observableArrayList("CASH", "NEFT", "UPI", "CHEQUE"));
     dpDate.setValue(LocalDate.now());

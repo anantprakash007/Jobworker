@@ -90,12 +90,12 @@
                             <ColumnConstraints hgrow="ALWAYS" percentWidth="20"/>
                             <ColumnConstraints hgrow="ALWAYS" percentWidth="20"/>
                         </columnConstraints>
-                        <HBox spacing="10">
+                       <!-- <HBox spacing="10">
                             <Label text="Worker ID"/>
                             <TextField fx:id="tfWorkerId"
                                        promptText="Enter ID"
                                        prefWidth="100"/>
-                        </HBox>
+                        </HBox> -->
                         <!-- JOBWORKER NAME -->
                         <VBox spacing="5" GridPane.columnIndex="0">
                             <HBox spacing="4" alignment="CENTER_LEFT">

@@ -6,6 +6,7 @@ import com.jobwork.service.JobWorkerService;
 import com.jobwork.service.MoneyService;
 import com.jobwork.util.ExcelExporter;
 import com.jobwork.util.GlobalUI;
+import com.jobwork.util.JobWorkerComboBoxUtil;
 import com.jobwork.util.PdfExporter;
 import java.io.File;
 import java.math.BigDecimal;
@@ -40,8 +41,8 @@ public class AdvanceLedgerController {
   @FXML
   public void initialize() {
 
-    cbWorker.setItems(FXCollections.observableArrayList(workerService.findAll()));
-
+    // cbWorker.setItems(FXCollections.observableArrayList(workerService.findAll()));
+    JobWorkerComboBoxUtil.setup(cbWorker, workerService.findAll());
     colDate.setCellValueFactory(
         c -> new SimpleStringProperty(GlobalUI.formatDate(c.getValue().getDate())));
 

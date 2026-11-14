@@ -8,6 +8,7 @@ import com.jobwork.service.JobWorkerService;
 import com.jobwork.service.MoneyService;
 import com.jobwork.util.ExcelExporter;
 import com.jobwork.util.GlobalUI;
+import com.jobwork.util.JobWorkerComboBoxUtil;
 import com.jobwork.util.PdfExporter;
 import java.io.File;
 import java.math.BigDecimal;
@@ -28,33 +29,61 @@ import org.springframework.stereotype.Component;
 public class MoneyReportController implements Initializable {
 
   @Autowired private MoneyService moneyService;
+
   @Autowired private JobWorkerService workerService;
+
   @Autowired private PdfExporter pdfExporter;
+
   @Autowired private ExcelExporter excelExporter;
+
   @Autowired private ProductEntryRepository productEntryRepo;
 
   @FXML private ComboBox<JobWorker> cbWorker;
+
   @FXML private DatePicker dpFrom;
+
   @FXML private DatePicker dpTo;
+
   @FXML private TextField tfChallanNo;
 
   @FXML private TableView<MoneyReceipt> tblReport;
 
   @FXML private TableColumn<MoneyReceipt, String> colDate;
+
   @FXML private TableColumn<MoneyReceipt, String> colChallan;
+
   @FXML private TableColumn<MoneyReceipt, String> colWorker;
+
   @FXML private TableColumn<MoneyReceipt, String> colAmount;
+
   @FXML private TableColumn<MoneyReceipt, String> colMode;
+
   @FXML private TableColumn<MoneyReceipt, String> colRemark;
 
   @FXML private Label lblTotalWork;
+
   @FXML private Label lblTotalPaid;
+
   @FXML private Label lblBalance;
+
+  // ============================================================
+  // INITIALIZE
+  // ============================================================
 
   @Override
   public void initialize(URL url, ResourceBundle rb) {
 
-    cbWorker.setItems(FXCollections.observableArrayList(workerService.findAll()));
+    /*
+     * CENTRAL JOB WORKER COMBOBOX
+     *
+     * IMPORTANT:
+     * Do not call cbWorker.setItems(...) again after this.
+     */
+    JobWorkerComboBoxUtil.setup(cbWorker, workerService.findAll());
+
+    // ========================================================
+    // TABLE COLUMNS
+    // ========================================================
 
     colDate.setCellValueFactory(
         c -> new SimpleStringProperty(GlobalUI.formatDate(c.getValue().getReceiptDate())));
@@ -88,44 +117,77 @@ public class MoneyReportController implements Initializable {
             new SimpleStringProperty(
                 c.getValue().getRemark() != null ? c.getValue().getRemark() : ""));
 
-    // highlight cancelled rows
+    // ========================================================
+    // CANCELLED ROW HIGHLIGHT
+    // ========================================================
+
     tblReport.setRowFactory(
         tv ->
             new TableRow<>() {
+
               @Override
               protected void updateItem(MoneyReceipt item, boolean empty) {
+
                 super.updateItem(item, empty);
 
                 if (item == null || empty) {
+
                   setStyle("");
+
                 } else if (item.getStatus() == EntryStatus.CANCELLED) {
-                  setStyle("-fx-background-color:#f3f4f6; -fx-text-fill:gray;");
+
+                  setStyle("-fx-background-color:#f3f4f6;" + " -fx-text-fill:gray;");
+
                 } else {
+
                   setStyle("");
                 }
               }
             });
+
+    // ========================================================
+    // ACTION COLUMNS
+    // ========================================================
 
     addEditColumn();
     addDeleteColumn();
     addRestoreColumn();
   }
 
-  // ================= SEARCH =================
+  // ============================================================
+  // SEARCH
+  // ============================================================
 
   @FXML
   public void onSearch() {
 
+    /*
+     * IMPORTANT:
+     *
+     * cbWorker.getValue() is JobWorker.
+     * We take only its database ID for the service query.
+     */
     Long workerId = cbWorker.getValue() != null ? cbWorker.getValue().getId() : null;
 
     LocalDate from = dpFrom.getValue();
+
     LocalDate to = dpTo.getValue();
 
     String challan = tfChallanNo.getText() != null ? tfChallanNo.getText().trim() : null;
 
-    if (challan != null && challan.isEmpty()) challan = null;
+    if (challan != null && challan.isEmpty()) {
+      challan = null;
+    }
+
+    // ========================================================
+    // LOAD MONEY RECEIPTS
+    // ========================================================
 
     List<MoneyReceipt> results = moneyService.searchReport(workerId, from, to, challan);
+
+    // ========================================================
+    // SORT BY DATE
+    // ========================================================
 
     results.sort(
         Comparator.comparing(
@@ -133,91 +195,124 @@ public class MoneyReportController implements Initializable {
 
     tblReport.setItems(FXCollections.observableArrayList(results));
 
-    // ================= TOTAL CALCULATION =================
+    // ========================================================
+    // TOTAL PAID
+    // ========================================================
 
-    // Total Paid
     BigDecimal totalPaid =
         results.stream()
             .filter(r -> r.getStatus() != EntryStatus.CANCELLED)
             .map(r -> r.getAmount() != null ? r.getAmount() : BigDecimal.ZERO)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-    // Total Work (from ProductEntry)
+    // ========================================================
+    // TOTAL WORK
+    // ========================================================
+
     BigDecimal totalWork = productEntryRepo.sumTotal(workerId, from, to);
-    if (totalWork == null) totalWork = BigDecimal.ZERO;
-    // Final Balance
+
+    if (totalWork == null) {
+      totalWork = BigDecimal.ZERO;
+    }
+
+    // ========================================================
+    // BALANCE
+    // ========================================================
+
     BigDecimal balance = totalWork.subtract(totalPaid);
 
-    // ================= UI UPDATE =================
+    // ========================================================
+    // UPDATE UI
+    // ========================================================
 
     lblTotalWork.setText("₹ " + totalWork.toPlainString());
+
     lblTotalPaid.setText("₹ " + totalPaid.toPlainString());
+
     lblBalance.setText("₹ " + balance.toPlainString());
   }
 
-  // ================= EDIT =================
+  // ============================================================
+  // EDIT COLUMN
+  // ============================================================
+
   private void addEditColumn() {
 
     TableColumn<MoneyReceipt, Void> col = new TableColumn<>("Edit");
 
-    col.setCellFactory(
-        c ->
-            new TableCell<>() {
+    TableCell<MoneyReceipt, Void> cell =
+        new TableCell<>() {
 
-              final Button btn = new Button("✏");
+          final Button btn = new Button("✏");
 
-              {
-                btn.setOnAction(
-                    e -> {
-                      MoneyReceipt r = getTableView().getItems().get(getIndex());
-                      openEditDialog(r);
-                    });
-              }
+          {
+            btn.setOnAction(
+                e -> {
+                  MoneyReceipt r = getTableView().getItems().get(getIndex());
 
-              @Override
-              protected void updateItem(Void v, boolean empty) {
-                super.updateItem(v, empty);
-                setGraphic(empty ? null : btn);
-              }
-            });
+                  openEditDialog(r);
+                });
+          }
+
+          @Override
+          protected void updateItem(Void v, boolean empty) {
+
+            super.updateItem(v, empty);
+
+            setGraphic(empty ? null : btn);
+          }
+        };
+
+    col.setCellFactory(c -> cell);
 
     tblReport.getColumns().add(col);
   }
 
-  // ================= DELETE =================
+  // ============================================================
+  // DELETE COLUMN
+  // ============================================================
+
   private void addDeleteColumn() {
 
     TableColumn<MoneyReceipt, Void> col = new TableColumn<>("Delete");
 
-    col.setCellFactory(
-        c ->
-            new TableCell<>() {
+    TableCell<MoneyReceipt, Void> cell =
+        new TableCell<>() {
 
-              final Button btn = new Button("🗑");
+          final Button btn = new Button("🗑");
 
-              {
-                btn.setOnAction(
-                    e -> {
-                      MoneyReceipt r = getTableView().getItems().get(getIndex());
+          {
+            btn.setOnAction(
+                e -> {
+                  MoneyReceipt r = getTableView().getItems().get(getIndex());
 
-                      if (GlobalUI.confirm("Delete", "Confirm delete?")) {
-                        moneyService.delete(r.getId());
-                        onSearch();
-                      }
-                    });
-              }
+                  if (GlobalUI.confirm("Delete", "Confirm delete?")) {
 
-              @Override
-              protected void updateItem(Void v, boolean empty) {
-                super.updateItem(v, empty);
-                setGraphic(empty ? null : btn);
-              }
-            });
+                    moneyService.delete(r.getId());
+
+                    onSearch();
+                  }
+                });
+          }
+
+          @Override
+          protected void updateItem(Void v, boolean empty) {
+
+            super.updateItem(v, empty);
+
+            setGraphic(empty ? null : btn);
+          }
+        };
+
+    col.setCellFactory(c -> cell);
 
     tblReport.getColumns().add(col);
   }
 
-  // ================= RESTORE =================
+  // ============================================================
+  // RESTORE COLUMN
+  // ============================================================
+
   private void addRestoreColumn() {
 
     TableColumn<MoneyReceipt, Void> col = new TableColumn<>("Restore");
@@ -232,18 +327,24 @@ public class MoneyReportController implements Initializable {
                 btn.setOnAction(
                     e -> {
                       MoneyReceipt r = getTableView().getItems().get(getIndex());
+
                       moneyService.restorePayment(r.getId());
+
                       GlobalUI.success("Restored");
+
                       onSearch();
                     });
               }
 
               @Override
               protected void updateItem(Void v, boolean empty) {
+
                 super.updateItem(v, empty);
 
                 if (empty) {
+
                   setGraphic(null);
+
                   return;
                 }
 
@@ -256,18 +357,23 @@ public class MoneyReportController implements Initializable {
     tblReport.getColumns().add(col);
   }
 
-  // ================= EDIT DIALOG =================
+  // ============================================================
+  // EDIT DIALOG
+  // ============================================================
+
   private void openEditDialog(MoneyReceipt r) {
 
     Dialog<MoneyReceipt> dialog = new Dialog<>();
+
     dialog.setTitle("Edit Receipt");
 
     ButtonType saveBtn = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+
     dialog.getDialogPane().getButtonTypes().addAll(saveBtn, ButtonType.CANCEL);
 
     TextField tfAmt = new TextField(r.getAmount() != null ? r.getAmount().toPlainString() : "");
 
-    TextField tfRemark = new TextField(r.getRemark());
+    TextField tfRemark = new TextField(r.getRemark() != null ? r.getRemark() : "");
 
     dialog
         .getDialogPane()
@@ -276,10 +382,23 @@ public class MoneyReportController implements Initializable {
     dialog.setResultConverter(
         btn -> {
           if (btn == saveBtn) {
-            r.setAmount(new BigDecimal(tfAmt.getText()));
+
+            try {
+
+              r.setAmount(new BigDecimal(tfAmt.getText().trim()));
+
+            } catch (Exception e) {
+
+              GlobalUI.warn("Invalid amount");
+
+              return null;
+            }
+
             r.setRemark(tfRemark.getText());
+
             return r;
           }
+
           return null;
         });
 
@@ -288,22 +407,32 @@ public class MoneyReportController implements Initializable {
         .ifPresent(
             updated -> {
               moneyService.save(updated);
+
               onSearch();
             });
   }
 
+  // ============================================================
+  // PDF
+  // ============================================================
+
   @FXML
   public void onPdf() {
+
     try {
+
       FileChooser fc = new FileChooser();
+
       fc.setTitle("Save PDF File");
 
       fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files (*.pdf)", "*.pdf"));
 
       File file = fc.showSaveDialog(null);
-      if (file == null) return;
 
-      // 🔥 CALL YOUR EXISTING PDF EXPORTER
+      if (file == null) {
+        return;
+      }
+
       pdfExporter.exportMoneyReport(
           tblReport.getItems(),
           cbWorker.getValue() != null ? cbWorker.getValue().getName() : "All",
@@ -314,23 +443,33 @@ public class MoneyReportController implements Initializable {
       GlobalUI.success("PDF exported successfully!");
 
     } catch (Exception e) {
+
       GlobalUI.warn("PDF export failed: " + e.getMessage());
     }
   }
 
+  // ============================================================
+  // EXCEL
+  // ============================================================
+
   @FXML
   public void onExcel() {
+
     try {
+
       FileChooser fc = new FileChooser();
+
       fc.setTitle("Save Excel File");
 
       fc.getExtensionFilters()
           .add(new FileChooser.ExtensionFilter("Excel Files (*.xlsx)", "*.xlsx"));
 
       File file = fc.showSaveDialog(null);
-      if (file == null) return;
 
-      // 🔥 CALL YOUR EXISTING EXPORTER
+      if (file == null) {
+        return;
+      }
+
       excelExporter.exportMoneyReport(
           tblReport.getItems(),
           cbWorker.getValue() != null ? cbWorker.getValue().getName() : "All",
@@ -341,6 +480,7 @@ public class MoneyReportController implements Initializable {
       GlobalUI.success("Excel exported successfully!");
 
     } catch (Exception e) {
+
       GlobalUI.warn("Excel export failed: " + e.getMessage());
     }
   }
