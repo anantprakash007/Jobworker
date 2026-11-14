@@ -13,6 +13,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import com.jobwork.util.JobWorkerComboBoxUtil;
 
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -98,14 +99,16 @@ public class MoneyReceiptController implements Initializable {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? "" : item.getId() + " - " + item.getName());
             }
-        });
-        cbJobWorker.setButtonCell(cbJobWorker.getCellFactory().call(null));
-        cbJobWorker.setItems(FXCollections.observableArrayList(workerService.findAll()));
-       */
+        });*/
+
         JobWorkerComboBoxUtil.setup(
                 cbJobWorker,
                 workerService.findAll()
         );
+        cbJobWorker.setButtonCell(cbJobWorker.getCellFactory().call(null));
+        cbJobWorker.setItems(FXCollections.observableArrayList(workerService.findAll()));
+
+
         cbEntryType.setItems(FXCollections.observableArrayList(EntryType.values()));
         cbTransferMode.setItems(FXCollections.observableArrayList(
                 "CASH","NEFT","UPI","CHEQUE"));
